@@ -1,12 +1,4 @@
 services:
-  api:
-    build: ./backend
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/backend
-    command: bash -c "python manage.py runserver 0.0.0.0:8000"
-
   web:
     build: ./frontend
     ports:
@@ -14,4 +6,30 @@ services:
     volumes:
       - ./frontend:/frontend
       - /frontend/node_modules
-    # tty: true
+  api:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/backend
+    command: bash -c "python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME}" ]
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgres_data:
