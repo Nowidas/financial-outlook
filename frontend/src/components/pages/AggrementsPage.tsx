@@ -3,7 +3,7 @@ import { useDocumentTitleComponent } from "@/components/global";
 
 
 import Layout from "../layout/dashboad_layout";
-import { ConnectionScrollList } from "../ui/ConnectionScrollList";
+import { ConnectionScrollList } from "@/components/ui/connectionScrollList";
 
 interface IProps {
   msg: string;
