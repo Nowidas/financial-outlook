@@ -10,7 +10,7 @@ import pandas as pd
 
 from celery import shared_task, group
 
-from app.models import Agreements
+from app.models import Agreements, Transactions
 
 
 @shared_task(bind=True)
@@ -106,7 +106,13 @@ def task_pool(self, agreement_id, access_token):
             "description",
         ]
     )
-    print(df.to_dict())
+    transaction_book = df.to_dict()
+    print(transaction_book) #! continuity broken
+
+    objs = Transactions.objects.bulk_create(
+        [Transactions(**transaction) for transaction in transaction_book]
+    )
+    objs.save()
 
 
 @shared_task(bind=True)
