@@ -12,12 +12,12 @@ export const HomePage: React.FC<IProps> = ({ msg }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [currentDate, setCurrentDate] = useState(0);
   useDocumentTitleComponent({ title: 'Spotify - HomePage' })
-  useEffect(() => {
-    fetch(' http://127.0.0.1:8000/').then(res => res.json()).then(data => {
-      setCurrentTime(data.time);
-      setCurrentDate(data.date)
-    });
-  }, []);
+  // useEffect(() => {
+  //   fetch(' http://127.0.0.1:8000/').then(res => res.json()).then(data => {
+  //     setCurrentTime(data.time);
+  //     setCurrentDate(data.date)
+  //   });
+  // }, []);
 
   return (
     <>
