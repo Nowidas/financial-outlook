@@ -5,6 +5,11 @@
     [ ] Start when connected
     [ ] Start on demand
     [ ] Store and show last CeleryJob date
+[ ] Regex rules for transaction type
+    [ ] idea
+    [ ] backendDB 
+    [ ] REST
+    [ ] FrontCard
 [ ] Step Last before MVP: Charts ideas and implementation 
 
 Later:
