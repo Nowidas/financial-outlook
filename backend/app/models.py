@@ -9,6 +9,8 @@ class Category(models.Model):
     def __str__(self):
         return str(self.custom_name)
 
+class Account(models.Model):
+    account_id = models.CharField(max_length=200, unique=True)
 
 class Agreements(models.Model):
     agreement_id = models.CharField(max_length=200, unique=True)
@@ -24,6 +26,7 @@ class Agreements(models.Model):
     )
     logo_url = models.CharField(max_length=200)
     status = models.CharField(max_length=2)
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.institution_id}:{self.agreement_id}"
@@ -33,7 +36,7 @@ class Transactions(models.Model):
     transaction_id = models.CharField(
         max_length=200, unique=True
     )  # account_id:transaction_id
-    # agreement = models.ManyToManyField(Agreements, through="Account")
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     value_date = models.DateTimeField()
     description = models.CharField(max_length=500)  # remittanceInformationUnstructured
@@ -46,22 +49,3 @@ class Transactions(models.Model):
     
     def __str__(self) -> str:
         return f"{self.amount}{self.currency} - {self.description} ({self.transaction_id})"
-
-class Account(models.Model):
-    account_id = models.CharField(max_length=200, unique=True)
-    agreements = models.ForeignKey(Agreements, on_delete=models.SET_NULL, null=True)
-    transactions = models.ForeignKey(Transactions, on_delete=models.SET_NULL, null=True)
-
-
-# class Category(models.Model):
-
-
-#     def __str__(self):
-#         return
-
-
-# class Transaction(models.Model):
-#     amount = models.
-
-#     def __str__(self):
-#         return

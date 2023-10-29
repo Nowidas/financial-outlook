@@ -10,7 +10,7 @@ import pandas as pd
 
 from celery import shared_task, group
 
-from app.models import Agreements, Transactions
+from app.models import Agreements, Transactions, Account
 
 
 @shared_task(bind=True)
@@ -39,8 +39,18 @@ def task_pool(self, agreement_id, access_token):
         return True
     data = r.json()
     print(data)
-    account_id = data.get("accounts")[0] if data.get("accounts") else None
+
+    # Step 3.5: Create account if not exist
+    if not data.get("accounts"):
+        return False
+    account_id = data.get("accounts")[0]
+    account_obj = Account.objects.filter(account_id=account_id).first()
+    if not account_obj:
+        account_obj = Account.objects.create(account_id=account_id)
+
+    
     agreement_element.status = data.get("status")
+    agreement_element.account = account_obj
     agreement_element.save()
     # if account not active for one day -> delete
     if (
@@ -110,7 +120,7 @@ def task_pool(self, agreement_id, access_token):
     print(transaction_book) #! continuity broken
 
     objs = Transactions.objects.bulk_create(
-        [Transactions(**transaction) for transaction in transaction_book],
+        [Transactions(account=account_obj, **transaction) for transaction in transaction_book],
         ignore_conflicts=True
     )
 
