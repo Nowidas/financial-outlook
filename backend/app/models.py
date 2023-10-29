@@ -33,7 +33,7 @@ class Transactions(models.Model):
     transaction_id = models.CharField(
         max_length=200, unique=True
     )  # account_id:transaction_id
-    agreement = models.ManyToManyField(Agreements, through="Account")
+    # agreement = models.ManyToManyField(Agreements, through="Account")
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     value_date = models.DateTimeField()
     description = models.CharField(max_length=500)  # remittanceInformationUnstructured
@@ -43,7 +43,9 @@ class Transactions(models.Model):
     creditor_name = models.CharField(max_length=200, null=True, blank=True)
     creditor_account = models.CharField(max_length=200, null=True, blank=True)
     currency = models.CharField(max_length=50)
-
+    
+    def __str__(self) -> str:
+        return f"{self.amount}{self.currency} - {self.description} ({self.transaction_id})"
 
 class Account(models.Model):
     account_id = models.CharField(max_length=200, unique=True)

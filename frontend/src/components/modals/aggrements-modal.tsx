@@ -122,7 +122,7 @@ export const AgreementsModal = () => {
       },
       data: {
         "institution_id": val.id,
-        "max_historical_days": val.transaction_total_days
+        "max_historical_days": 90
       }
     };
 

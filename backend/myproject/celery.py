@@ -33,7 +33,7 @@ app.conf.beat_schedule = {
     # },
     "fetch-transactions-data": {
         "task": "app.tasks.fetch_transactions_data",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute=0, hour=0),
     },
 }
 

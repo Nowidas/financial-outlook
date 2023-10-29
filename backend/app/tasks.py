@@ -82,7 +82,7 @@ def task_pool(self, agreement_id, access_token):
     )
     #! df["transactionsAccount"] = account_id
     df["transaction_id"] = (
-        df["account_id"]
+        account_id
         + ":"
         + df["transactionId"].apply(lambda x: str(x).replace(";", ""))
     )
@@ -106,13 +106,13 @@ def task_pool(self, agreement_id, access_token):
             "description",
         ]
     )
-    transaction_book = df.to_dict()
+    transaction_book = df.to_dict(orient='records')
     print(transaction_book) #! continuity broken
 
     objs = Transactions.objects.bulk_create(
-        [Transactions(**transaction) for transaction in transaction_book]
+        [Transactions(**transaction) for transaction in transaction_book],
+        ignore_conflicts=True
     )
-    objs.save()
 
 
 @shared_task(bind=True)
