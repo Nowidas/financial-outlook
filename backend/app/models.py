@@ -11,6 +11,8 @@ class Category(models.Model):
 
 class Account(models.Model):
     account_id = models.CharField(max_length=200, unique=True)
+    def __str__(self):
+        return f"{self.account_id}"
 
 class Agreements(models.Model):
     agreement_id = models.CharField(max_length=200, unique=True)
