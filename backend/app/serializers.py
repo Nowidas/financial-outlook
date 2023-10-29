@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 
-from app.models import Agreements, Category
+from app.models import Account, Agreements, Category, Transactions
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,15 +32,7 @@ class AgreementsSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Agreements
-        # fields = [
-        #     "agreement_id",
-        #     "created_at",
-        #     "institution_id",
-        #     "category",
-        #     "account",
-        # ]
         fields = "__all__"
-        # ordering = ["url"]
 
     def create(self, validated_data):
         account_data = validated_data.pop("category")
@@ -60,7 +52,18 @@ class AgreementsSerializer(serializers.HyperlinkedModelSerializer):
         instance.save()
         return instance
 
-    # def destroy(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     self.perform_destroy(instance)
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+class AccountSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = "__all__"
+        
+
+class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
+    account = AccountSerializer()
+
+    class Meta:
+        model = Transactions
+        fields = "__all__"
+        

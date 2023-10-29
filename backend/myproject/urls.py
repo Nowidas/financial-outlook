@@ -26,6 +26,8 @@ router.register(r"users", views.UserViewSet)
 router.register(r"groups", views.GroupViewSet)
 router.register(r"agreements", views.AgreementsViewSet)
 router.register(r"category", views.CategoryViewSet)
+router.register(r"transactions", views.TransactionViewSet)
+router.register(r"account", views.AccountViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [

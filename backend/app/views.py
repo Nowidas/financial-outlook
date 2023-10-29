@@ -17,12 +17,14 @@ from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from app.serializers import (
+    AccountSerializer,
     UserSerializer,
     GroupSerializer,
     AgreementsSerializer,
     CategorySerializer,
+    TransactionsSerializer
 )
-from app.models import Agreements, Category
+from app.models import Account, Agreements, Category, Transactions
 
 
 class LogoutView(views.APIView):
@@ -102,7 +104,16 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
-# class TransactionViewSet(viewsets.ModelViewSet):
+class TransactionViewSet(viewsets.ModelViewSet):
+    queryset = Transactions.objects.all()
+    serializer_class = TransactionsSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class AccountViewSet(viewsets.ModelViewSet):
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 
 class GetGoCardlessToken(views.APIView):
