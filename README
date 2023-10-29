@@ -1,0 +1,13 @@
+### To-do-list
+
+[ ] Group by category -- backend
+[ ] RestCalls for starting Celery task
+    [ ] Start when connected
+    [ ] Start on demand
+    [ ] Store and show last CeleryJob date
+[ ] Step Last before MVP: Charts ideas and implementation 
+
+Later:
+[ ] Google Auth
+[ ] Users dif
+[ ] Pagination object React
