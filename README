@@ -5,6 +5,7 @@
     [ ] Start when connected
     [ ] Start on demand
     [ ] Store and show last CeleryJob date
+[ ] Transaction list - Card
 [ ] Regex rules for transaction type
     [ ] idea
     [ ] backendDB 
