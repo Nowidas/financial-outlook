@@ -40,7 +40,7 @@ class Transactions(models.Model):
     )  # account_id:transaction_id
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
     amount = models.DecimalField(max_digits=6, decimal_places=2)
-    value_date = models.DateTimeField()
+    value_date = models.DateField()
     description = models.CharField(max_length=500)  # remittanceInformationUnstructured
     balance_after = models.DecimalField(max_digits=6, decimal_places=2)
     debtor_name = models.CharField(max_length=200, null=True, blank=True)
@@ -54,7 +54,7 @@ class Transactions(models.Model):
 
 class Task(models.Model):
     status = models.CharField(default="Working")
-    date_done = models.DateField(null=True, blank=True)
+    date_done = models.DateTimeField(null=True, blank=True)
     affected_account = models.ManyToManyField(Agreements, null=True)
     def __str__(self) -> str:
         return f"{self.status}"

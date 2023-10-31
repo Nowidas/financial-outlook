@@ -142,7 +142,7 @@ def finish_pool(self, pass_val):
         print('task saved as error')
         task.status = 'Error'
         
-    task.date_done = datetime.datetime.now()
+    task.date_done = datetime.datetime.now(datetime.timezone.utc)
     task.save()
 
 @shared_task(bind=True)
