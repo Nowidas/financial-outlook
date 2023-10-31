@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.shortcuts import render
@@ -24,7 +25,8 @@ from app.serializers import (
     CategorySerializer,
     TransactionsSerializer
 )
-from app.models import Account, Agreements, Category, Transactions
+from app.models import Account, Agreements, Category, Transactions, Task
+from app.tasks import fetch_transactions_data
 
 
 class LogoutView(views.APIView):
@@ -113,6 +115,16 @@ class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class TaskDetail(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def post(self, request, format=None):
+
+        if_task_created = fetch_transactions_data.apply_async()
+        print(if_task_created)
+        if if_task_created:
+            return Response(status=status.HTTP_200_OK)
 
 
 

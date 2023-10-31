@@ -51,3 +51,10 @@ class Transactions(models.Model):
     
     def __str__(self) -> str:
         return f"{self.amount}{self.currency} - {self.description} ({self.transaction_id})"
+
+class Task(models.Model):
+    status = models.CharField(default="Working")
+    date_done = models.DateField(null=True, blank=True)
+    affected_account = models.ManyToManyField(Agreements, null=True)
+    def __str__(self) -> str:
+        return f"{self.status}"

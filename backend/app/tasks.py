@@ -4,13 +4,14 @@ import os
 import time
 import datetime
 import random
+import numpy as np
 import requests
 
 import pandas as pd
 
-from celery import shared_task, group
+from celery import shared_task, group, chord
 
-from app.models import Agreements, Transactions, Account
+from app.models import Agreements, Task, Transactions, Account
 
 
 @shared_task(bind=True)
@@ -21,6 +22,9 @@ def add(self):
 
 @shared_task(bind=True)
 def task_pool(self, agreement_id, access_token):
+    # time.sleep(5)
+    # print("Waited 5s")
+    # return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
@@ -80,6 +84,7 @@ def task_pool(self, agreement_id, access_token):
     )
     if r.status_code != 200:
         print("Error fetching data from account")
+        print(r.json())
         return True
     data = r.json()
     data = data["transactions"]["booked"]
@@ -116,17 +121,42 @@ def task_pool(self, agreement_id, access_token):
             "description",
         ]
     )
+    df = df.replace(np.nan,'',regex=True)
     transaction_book = df.to_dict(orient='records')
     print(transaction_book) #! continuity broken
 
+    # Step 5: Save to db transactions that are not already saved
     objs = Transactions.objects.bulk_create(
         [Transactions(account=account_obj, **transaction) for transaction in transaction_book],
         ignore_conflicts=True
     )
 
+@shared_task(bind=True)
+def finish_pool(self, pass_val):
+    # Step 6: Closing task
+    task = Task.objects.all().filter(status="Working").first()
+    if pass_val:
+        task.status = 'Done'
+        print('task saved as done')
+    else:
+        print('task saved as error')
+        task.status = 'Error'
+        
+    task.date_done = datetime.datetime.now()
+    task.save()
 
 @shared_task(bind=True)
 def fetch_transactions_data(self):
+    # run task if not running and log everything to db
+    task = Task.objects.all().filter(status="Working").first()
+    if task:
+        print('task already working')
+        return False
+    
+    task = Task.objects.create()
+    task.save()
+    print('task saved as working')
+
     # Step 1: load or get secret to api
     headers = {"accept": "application/json", "Content-Type": "application/json"}
     payload = {
@@ -142,22 +172,24 @@ def fetch_transactions_data(self):
 
     #! Implement retry 3 times and report of filature
     if r.status_code != 200:
-        return True
+        return False
 
     YOUR_ACCESS_TOKEN = r.json()["access"]
     print(YOUR_ACCESS_TOKEN)
 
     # Step 2: get agreements ids and create task pool
     query = Agreements.objects.all()
-    run_group = group(
+    run_chord = chord(
         [
             task_pool.s(query_element.agreement_id, YOUR_ACCESS_TOKEN)
             for query_element in query
-        ]
-    )
-    res = run_group()
-    return res
+        ],
+        finish_pool.s()
 
+    )
+    res = run_chord()
+    return True
+    
 
 @shared_task(bind=True)
 def delete_expired_agreements(self):

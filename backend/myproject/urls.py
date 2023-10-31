@@ -39,4 +39,5 @@ urlpatterns = [
     ),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("admin/", admin.site.urls),
+    path('tasks/', views.TaskDetail.as_view()),
 ]
