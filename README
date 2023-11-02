@@ -1,7 +1,8 @@
 ### To-do-list
 
 [ ] Group by category -- backend
-[ ] RestCalls for starting Celery task
+[X] RestCalls for starting Celery task
+    Frontend
     [ ] Start when connected
     [ ] Start on demand
     [ ] Store and show last CeleryJob date

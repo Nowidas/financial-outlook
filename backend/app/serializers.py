@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 
-from app.models import Account, Agreements, Category, Transactions
+from app.models import Account, Agreements, Category, Transactions, Task
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -67,3 +67,15 @@ class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
         model = Transactions
         fields = "__all__"
         
+class TaskSerializer(serializers.HyperlinkedModelSerializer):
+#    url = serializers.SerializerMethodField('get_employee_detail_url')
+
+
+#    def get_employee_detail_url(self, obj):
+#        # generate the URL for the composite key
+#        ...
+#        return composite_key_url
+   
+    class Meta:
+        model = Task
+        fields = "__all__"

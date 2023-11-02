@@ -1,7 +1,7 @@
 import datetime
 import json
 
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login, logout
@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 import requests
 
-from rest_framework import viewsets, views
+from rest_framework import viewsets, views, generics
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -23,7 +23,8 @@ from app.serializers import (
     GroupSerializer,
     AgreementsSerializer,
     CategorySerializer,
-    TransactionsSerializer
+    TransactionsSerializer,
+    TaskSerializer
 )
 from app.models import Account, Agreements, Category, Transactions, Task
 from app.tasks import fetch_transactions_data
@@ -116,9 +117,28 @@ class AccountViewSet(viewsets.ModelViewSet):
     serializer_class = AccountSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class TaskDetail(views.APIView):
+class TaskViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Task.objects.all()
+
+
+    @action(detail=False)
+    def last_task(self, request):
+        recent_tasks = [Task.objects.all().order_by('-date_done').first()]
+
+        page = self.paginate_queryset(recent_tasks)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(recent_tasks, many=True)
+        return Response(serializer.data)
+
+
+class TaskControl(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
-    
+
     def post(self, request, format=None):
 
         if_task_created = fetch_transactions_data.apply_async()
