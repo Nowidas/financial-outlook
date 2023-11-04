@@ -1,20 +1,20 @@
 ### To-do-list
 
-[ ] Group by category -- backend
-[X] RestCalls for starting Celery task
-    Frontend
-    [ ] Start when connected
+[ ] Connections - *Card*
+    [X] RestCalls for starting Celery task
     [ ] Start on demand
     [ ] Store and show last CeleryJob date
-[ ] Transaction list - Card
-[ ] Regex rules for transaction type
+    [ ] *BigTask* Group by category -- backend
+[O] Transaction list - *Card*
+[ ] Regex rules for transaction type - *Card*
     [ ] idea
     [ ] backendDB 
     [ ] REST
     [ ] FrontCard
-[ ] Step Last before MVP: Charts ideas and implementation 
+[ ] Get current Accounts balance - *Card*  
+[ ] Step Last before MVP: Charts ideas and implementation - *Card*
 
 Later:
 [ ] Google Auth
 [ ] Users dif
-[ ] Pagination object React
+[X] Pagination object React -> React Query is the way
