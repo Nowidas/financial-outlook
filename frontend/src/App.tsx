@@ -6,27 +6,34 @@ import { BrowserRouter as Router, Routes, Route }
 import useDocumentTitleComponent from '@/components/global/useDocumentTitleComponent'
 import Layout from "@/components/layout/auth_layout"
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
 import { ModalProvider } from './components/providers/modal-provider';
 import { ToasterProvider } from './components/providers/toast-provider';
 import { ThemeProvider } from './components/theme-provider';
 
 function App() {
   const [count, setCount] = useState(0)
+  // Create a client
+  const queryClient = new QueryClient()
 
   return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <div className="flex flex-col  w-full h-full">
-          <ToasterProvider />
-          <ModalProvider />
-          <Router>
-            <Routes>
-              <Route path='/' element={<AggrementsPage msg="AggrementsPage" />} />
-              <Route path='/login' element={<Login msg="LoginPage" />} />
-              <Route path='/logout' element={<Logout />} />
-            </Routes>
-          </Router>
-        </div>
+        <QueryClientProvider client={queryClient}>
+          <div className="flex flex-col  w-full h-full">
+            <ToasterProvider />
+            <ModalProvider />
+            <Router>
+              <Routes>
+                <Route path='/' element={<AggrementsPage msg="AggrementsPage" />} />
+                <Route path='/login' element={<Login msg="LoginPage" />} />
+                <Route path='/logout' element={<Logout />} />
+              </Routes>
+            </Router>
+          </div>
+        </QueryClientProvider>
+
       </ThemeProvider>
     </>
   )

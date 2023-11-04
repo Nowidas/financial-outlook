@@ -6,7 +6,7 @@ export default function Layout({ children }) {
     return (
         <div className="grow">
             <Navbar />
-            <div className="flex items-center justify-left space-x-2 m-4">
+            <div className="flex items-top justify-left space-x-2 m-4">
                 {/* display the child prop */}
 
                 {children}

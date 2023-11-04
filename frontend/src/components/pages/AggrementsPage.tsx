@@ -5,6 +5,8 @@ import { useDocumentTitleComponent } from "@/components/global";
 import Layout from "../layout/dashboad_layout";
 import { ConnectionScrollList } from "@/components/ui/connectionScrollList";
 
+import { TransactionsCard } from "@/components/transations-card"
+
 interface IProps {
   msg: string;
 }
@@ -24,6 +26,7 @@ export const AggrementsPage: React.FC<IProps> = ({ msg }) => {
 
   return (
     <Layout>
+      <TransactionsCard />
       <ConnectionScrollList className="" />
     </Layout>
   );
