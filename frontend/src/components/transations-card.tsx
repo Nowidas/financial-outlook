@@ -17,7 +17,7 @@ import {
 export const TransactionsCard = () => {
   return (
     <>
-      <Card className="w-[900px]">
+      <Card className="w-[1000px]">
         <CardHeader className="flex flex-row space-y-0">
           <div className="w-full">
             <CardTitle className="text-3xl font-bold tracking-tight">Transactions</CardTitle>

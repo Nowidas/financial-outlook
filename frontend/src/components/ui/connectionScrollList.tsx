@@ -63,7 +63,7 @@ export function ConnectionScrollList({
         await CategoryData.fetchData();
       } catch (error) {
         console.error("Error fetching data: CategoryData");
-        toast.error('Error fetching data')
+        toast.error('Error fetching categories')
       }
     };
     fetchDataAndHandleErrors();
@@ -82,7 +82,7 @@ export function ConnectionScrollList({
         await fetchData()
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error('Error fetching data')
+        toast.error('Error fetching connections')
       }
     };
 
@@ -91,7 +91,7 @@ export function ConnectionScrollList({
   }, [isOpen]);
 
   return (
-    <Card className="w-[900px]">
+    <Card className="w-auto">
       <CardHeader className="flex flex-row space-y-0">
         <div className="w-full">
           <CardTitle className="text-3xl font-bold tracking-tight">Connections</CardTitle>
@@ -149,6 +149,9 @@ export function ConnectionScrollList({
               }
             </TableBody>
           </Table>
+          {dataCRUD?.length == 0 ?
+            <div className="flex flex-row justify-center w-full text-sm	p-4">No results.</div>
+            : null}
           <Button variant="outline" className="w-full" disabled={isLoading} onClick={onOpen}>Add new connection</Button>
         </div>
 

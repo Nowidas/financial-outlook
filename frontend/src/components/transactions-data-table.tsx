@@ -26,42 +26,38 @@ interface DataTableProps<TData, TValue> {
   dataQuery: UseQueryResult
 }
 
-async function fetchTransactions(page = 0) {
-  // Fetch data from your API here.
-  try {
-    const res = await axiosSesion.get('http://127.0.0.1:8000/transactions/?page=' + (page + 1))
-    const data = res.data.results
-    const count = res.data.count
-    const formatted_result = data.map((data) => {
-      return {
-        "id": data.url,
-        "amount": data.amount,
-        "description": data.description,
-        "value_date": data.value_date
-      }
-    })
-    return {
-      'count': count,
-      'rows': [...formatted_result]
-    }
-  } catch {
-    toast.error("Error fetching transactions")
-  }
-  return {
-    'count': 1,
-    'rows': [{
-      "id": "",
-      "amount": 0,
-      "description": "",
-      "value_date": ""
-    }]
-  }
-}
 
 export function DataTable<TData, TValue>({
   columns,
 }: DataTableProps<TData, TValue>) {
 
+
+  async function fetchTransactions(page = 0) {
+    // Fetch data from your API here.
+    try {
+      const res = await axiosSesion.get('http://127.0.0.1:8000/transactions/?page=' + (page + 1))
+      const data = res.data.results
+      const count = res.data.count
+      const formatted_result = data.map((data) => {
+        return {
+          "id": data.url,
+          "amount": data.amount,
+          "description": data.description,
+          "value_date": data.value_date
+        }
+      })
+      return {
+        'count': count,
+        'rows': [...formatted_result]
+      }
+    } catch {
+      toast.error("Error fetching transpactions")
+    }
+    return {
+      'count': 1,
+      'rows': []
+    }
+  }
 
 
   const [{ pageIndex, pageSize }, setPagination] =
@@ -81,20 +77,19 @@ export function DataTable<TData, TValue>({
   const dataQuery = useQuery({
     queryKey: ['transactions', pageIndex],
     queryFn: () => fetchTransactions(pageIndex),
-    keepPreviousData: true
+
   })
 
   const defaultData = useMemo(() => [], [])
 
   // console.warn(dataQuery.isFetched)
-  console.warn((dataQuery?.data))
-  console.warn(Math.ceil(dataQuery?.data?.count / 10))
+  // console.warn(Math.ceil(dataQuery?.data?.count / 10))
 
   const table = useReactTable({
-    data: dataQuery?.data?.rows ?? defaultData,
+    data: dataQuery.data?.rows ?? defaultData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    pageCount: Math.ceil(dataQuery?.data?.count / 10),
+    pageCount: Math.ceil(dataQuery.data?.count / 10),
     onPaginationChange: setPagination,
     state: {
       pagination,
@@ -108,10 +103,9 @@ export function DataTable<TData, TValue>({
   // }
 
   return (
-    <div>
-
-      <div className="rounded-md border">
-        <Table>
+    <>
+      <div className="rounded-md border w-full">
+        <Table >
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -138,7 +132,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="h-6">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -146,7 +140,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length} className="h-6 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -172,6 +166,6 @@ export function DataTable<TData, TValue>({
           Next
         </Button>
       </div>
-    </div>
+    </>
   )
 }
