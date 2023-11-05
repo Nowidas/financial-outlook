@@ -57,6 +57,9 @@ class Transactions(models.Model):
             f"{self.amount}{self.currency} - {self.description} ({self.transaction_id})"
         )
 
+    class Meta:
+        ordering = ("-value_date",)
+
 
 class Task(models.Model):
     status = models.CharField(default="Working")
