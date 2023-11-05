@@ -54,7 +54,7 @@ class Transactions(models.Model):
 
 class Task(models.Model):
     status = models.CharField(default="Working")
-    date_done = models.DateTimeField(null=True, blank=True)
+    date_done = models.DateTimeField(default=datetime.now, null=True, blank=True)
     affected_account = models.ManyToManyField(Agreements, null=True)
     def __str__(self) -> str:
         return f"{self.status}"
