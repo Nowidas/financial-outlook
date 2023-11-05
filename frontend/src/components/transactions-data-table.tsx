@@ -17,19 +17,18 @@ import {
 } from "@/components/ui/table"
 import { Button } from "./ui/button"
 import { useMemo, useState } from "react"
-import { UseQueryResult, useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import axiosSesion from "./helpers/sesioninterceptor"
 import toast from "react-hot-toast"
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  dataQuery: UseQueryResult
-}
+// interface DataTableProps<TData, TValue> {
+//   columns: ColumnDef<TData, TValue>[]
+// }
 
 
-export function DataTable<TData, TValue>({
+export function DataTable({
   columns,
-}: DataTableProps<TData, TValue>) {
+}) {
 
 
   async function fetchTransactions(page = 0) {
@@ -59,7 +58,6 @@ export function DataTable<TData, TValue>({
     }
   }
 
-
   const [{ pageIndex, pageSize }, setPagination] =
     useState<PaginationState>({
       pageIndex: 0,
@@ -77,13 +75,11 @@ export function DataTable<TData, TValue>({
   const dataQuery = useQuery({
     queryKey: ['transactions', pageIndex],
     queryFn: () => fetchTransactions(pageIndex),
-
+    staleTime: 5000,
+    placeholderData: keepPreviousData
   })
 
   const defaultData = useMemo(() => [], [])
-
-  // console.warn(dataQuery.isFetched)
-  // console.warn(Math.ceil(dataQuery?.data?.count / 10))
 
   const table = useReactTable({
     data: dataQuery.data?.rows ?? defaultData,
@@ -97,10 +93,7 @@ export function DataTable<TData, TValue>({
     manualPagination: true,
     debugTable: true,
   })
-  // const fetchDataOptions = {
-  //   pageIndex,
-  //   pageSize,
-  // }
+
 
   return (
     <>
