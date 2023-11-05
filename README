@@ -1,6 +1,7 @@
 ### To-do-list
 
 [ ] Connections - *Card*
+    [ ] *Send email* if Task is running for too long
     [X] RestCalls for starting Celery task
     [ ] Start on demand
     [ ] Store and show last CeleryJob date
