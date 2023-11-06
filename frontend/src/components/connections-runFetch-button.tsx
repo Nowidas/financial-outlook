@@ -31,6 +31,7 @@ export default function ConnectionsRunFetchButton({
 
   async function fetchLastTask() {
     // Fetch data from your API here.
+    console.log('Repeated task ongoing')
     try {
       const res = await axiosSesion.get('http://127.0.0.1:8000/tasks/last')
       const data = res.data.results[0]
@@ -41,15 +42,15 @@ export default function ConnectionsRunFetchButton({
     return {}
   }
 
-  const { data } = useQuery({
-    queryKey: ['tasks'],
+  const { data, isFetching } = useQuery({
+    queryKey: ['tasks_refetching'],
     queryFn: () => fetchLastTask(),
     refetchInterval: 1000,
     enabled: enabled,
   })
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || isFetching) {
       return;
     }
     const fetching_satus = data.status
