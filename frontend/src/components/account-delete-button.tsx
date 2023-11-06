@@ -63,7 +63,7 @@ export default function AccountDeleteButton({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
-          {!deleteLoading ? <Button onClick={() => postDelete(cur_item.url, fetchData)}>Continue</Button> : <Button disabled>
+          {!deleteLoading ? <Button variant='destructive' onClick={() => postDelete(cur_item.url, fetchData)}>Continue</Button> : <Button disabled>
             <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
             Deleting..
           </Button>}

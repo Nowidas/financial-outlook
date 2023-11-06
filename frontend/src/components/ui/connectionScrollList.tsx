@@ -8,6 +8,7 @@ import { Modal } from "../ui/modal";
 import { useAgreementsModal } from "../hooks/use-aggrements-modal";
 import toast from "react-hot-toast";
 import { Skeleton } from "../ui/skeleton";
+import { format } from 'date-fns'
 import {
   Table,
   TableBody,
@@ -21,6 +22,10 @@ import {
   Trash2,
   Pencil,
   RefreshCcw,
+  Calendar,
+  ArrowBigLeftIcon,
+  ArrowBigRightIcon,
+  ArrowRightIcon,
 } from "lucide-react"
 import {
   Card,
@@ -33,6 +38,10 @@ import {
 
 import AccountNameSwitcher from "@/components/account-name-switcher"
 import AccountDeleteButton from "../account-delete-button";
+import { Separator } from "./separator";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { PaginationState } from "@tanstack/react-table";
+import ConnectionsRunFetchButton from "../connections-runFetch-button";
 
 export function ConnectionScrollList({
   className,
@@ -69,6 +78,25 @@ export function ConnectionScrollList({
     fetchDataAndHandleErrors();
   }, []);
 
+  async function fetchLastTask() {
+    // Fetch data from your API here.
+    try {
+      const res = await axiosSesion.get('http://127.0.0.1:8000/tasks/last')
+      const data = res.data.results[0]
+      const formatted_data = format(new Date(data.date_done), 'dd MMM yyyy')
+      return { formatted_data, ...data }
+    } catch (err) {
+      toast.error("Error fetching fetching last task")
+    }
+    return {}
+  }
+
+  const dataQuery = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => fetchLastTask(),
+    staleTime: 5000,
+    placeholderData: keepPreviousData
+  })
 
   useEffect(() => {
     if (isOpen) {
@@ -154,7 +182,15 @@ export function ConnectionScrollList({
             : null}
           <Button variant="outline" className="w-full" disabled={isLoading} onClick={onOpen}>Add new connection</Button>
         </div>
-
+        <Separator />
+        <div className="flex flex-row m-4 ">
+          <div className="flex grow space-x-1 items-center text-sm text-muted-foreground">
+            <Calendar /> <div>Last fetching date: {dataQuery?.data?.formatted_data ?? "Loading.."} </div>
+          </div>
+          <div className="">
+            <ConnectionsRunFetchButton />
+          </div>
+        </div>
       </CardContent>
 
     </Card>

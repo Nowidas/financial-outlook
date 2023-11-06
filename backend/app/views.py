@@ -24,7 +24,7 @@ from app.serializers import (
     AgreementsSerializer,
     CategorySerializer,
     TransactionsSerializer,
-    TaskSerializer
+    TaskSerializer,
 )
 from app.models import Account, Agreements, Category, Transactions, Task
 from app.tasks import fetch_transactions_data
@@ -112,20 +112,21 @@ class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionsSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Task.objects.all()
 
-
     @action(detail=False)
-    def last_task(self, request):
-        recent_tasks = [Task.objects.all().order_by('-date_done').first()]
+    def last(self, request):
+        recent_tasks = [Task.objects.all().order_by("-date_done").first()]
 
         page = self.paginate_queryset(recent_tasks)
         if page is not None:
@@ -140,12 +141,10 @@ class TaskControl(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, format=None):
-
         if_task_created = fetch_transactions_data.apply_async()
         print(if_task_created)
         if if_task_created:
             return Response(status=status.HTTP_200_OK)
-
 
 
 class GetGoCardlessToken(views.APIView):
