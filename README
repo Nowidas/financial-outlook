@@ -20,9 +20,7 @@
     [ ] Adding assigning type rule (fields: Regex_string, transaction_type)
 [ ] Get current Accounts balance - *Card*  
 [ ] Step Last before MVP: Charts ideas and implementation - *Card*
-[ ] Chores (not for now -> rushing MVP version)
 
 Later:
-[ ] Google Auth
-[ ] Users dif
-[X] Pagination object React -> React Query is the way
+[ ] Chores (not for now -> rushing MVP version)
+[ ] Testing backend and frontend
