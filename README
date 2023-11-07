@@ -22,5 +22,6 @@
 [ ] Step Last before MVP: Charts ideas and implementation - *Card*
 
 Later:
+[ ] Fix types (TS)
 [ ] Chores (not for now -> rushing MVP version)
 [ ] Testing backend and frontend

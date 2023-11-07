@@ -19,7 +19,10 @@ import { RefreshCcw } from "lucide-react"
 export const TransactionsCard = () => {
   const queryClient = useQueryClient()
   const [fetching, setFetching] = useState(false)
+  const [effect, setEffect] = useState(false)
+
   const refetch = async () => {
+    setEffect(true)
     setFetching(true)
     await queryClient.invalidateQueries({ queryKey: ['transactions'], type: 'active', })
     setFetching(false)
@@ -33,7 +36,7 @@ export const TransactionsCard = () => {
             <CardTitle className="text-3xl font-bold tracking-tight">Transactions</CardTitle>
             <CardDescription className="text-sm text-muted-foreground">All fetched transactions from connected accounts</CardDescription>
           </div>
-          <Button disabled={fetching} onClick={refetch} variant="outline" className="p-1 w-10 h-10"><RefreshCcw /></Button>
+          <Button disabled={fetching || effect} onClick={refetch} variant="outline" className={`p-1 w-10 h-10`} ><RefreshCcw className={`${effect && "animate-spin ease-out repeat-1"}`} onAnimationEnd={() => setEffect(false)} /></Button>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-2 m-4">
