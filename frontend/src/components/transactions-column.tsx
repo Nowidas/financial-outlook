@@ -15,6 +15,10 @@ export const columns: ColumnDef<Transactions>[] = [
         header: "Value date",
     },
     {
+        accessorKey: "category",
+        header: "Category",
+    },
+    {
         accessorKey: "description",
         header: "Description",
     },

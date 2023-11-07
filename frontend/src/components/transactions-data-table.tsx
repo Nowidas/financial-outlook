@@ -42,7 +42,8 @@ export function DataTable({
           "id": data.url,
           "amount": data.amount,
           "description": data.description,
-          "value_date": data.value_date
+          "value_date": data.value_date,
+          "category": data.account.agreements.category.custom_name
         }
       })
       return {

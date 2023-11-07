@@ -54,6 +54,8 @@ class AgreementsSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AccountSerializer(serializers.HyperlinkedModelSerializer):
+    agreements = AgreementsSerializer()
+
     class Meta:
         model = Account
         fields = "__all__"

@@ -31,7 +31,7 @@ class Agreements(models.Model):
     )
     logo_url = models.CharField(max_length=200)
     status = models.CharField(max_length=2)
-    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
+    account = models.OneToOneField(Account, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.institution_id}:{self.agreement_id}"

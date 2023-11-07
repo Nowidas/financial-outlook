@@ -21,7 +21,7 @@ export const TransactionsCard = () => {
   const [fetching, setFetching] = useState(false)
   const refetch = async () => {
     setFetching(true)
-    await queryClient.refetchQueries({ queryKey: ['transactions'], type: 'active', })
+    await queryClient.invalidateQueries({ queryKey: ['transactions'], type: 'active', })
     setFetching(false)
   }
 
