@@ -1,19 +1,26 @@
 ### To-do-list
-
+[ ] Auth module
+    [ ] Change auth from tokens on server to external service (Clerk?) with google auth
+    [ ] Show user info in navbar
+    [ ] Authorization for resources created by different users
 [ ] Connections - *Card*
     [ ] *Send email* if Task is running for too long
+    [ ] *Small UI changes* Show red if connections is close to expire and *Send email* x days before
+    [ ] *Error message* for creating connections on account that already have been connected (cuz oneToOne relationship on Account<>Agreements)
     [X] RestCalls for starting Celery task
-    [ ] Start on demand
-    [ ] Store and show last CeleryJob date
-    [ ] *BigTask* Group by category -- backend
-[O] Transaction list - *Card*
+    [X] Start on demand
+    [X] Store and show last CeleryJob date
+    [X] *BigTask* Group by category -- backend
+[ ] Transaction list - *Card*
+    [ ] Table with *good pagination*
+    [ ] Action buttons for (change_type, disable_from_dashboard, ...) transactions
+    [ ] Add custom transaction (not from connections)
 [ ] Regex rules for transaction type - *Card*
-    [ ] idea
-    [ ] backendDB 
-    [ ] REST
-    [ ] FrontCard
+    [ ] Adding transaction type (fields: transaction_type_name, icon, )
+    [ ] Adding assigning type rule (fields: Regex_string, transaction_type)
 [ ] Get current Accounts balance - *Card*  
 [ ] Step Last before MVP: Charts ideas and implementation - *Card*
+[ ] Chores (not for now -> rushing MVP version)
 
 Later:
 [ ] Google Auth
