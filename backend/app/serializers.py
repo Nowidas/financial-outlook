@@ -54,11 +54,10 @@ class AgreementsSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AccountSerializer(serializers.HyperlinkedModelSerializer):
-
     class Meta:
         model = Account
         fields = "__all__"
-        
+
 
 class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
     account = AccountSerializer()
@@ -66,16 +65,16 @@ class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Transactions
         fields = "__all__"
-        
+
+
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
-#    url = serializers.SerializerMethodField('get_employee_detail_url')
+    #    url = serializers.SerializerMethodField('get_employee_detail_url')
 
+    #    def get_employee_detail_url(self, obj):
+    #        # generate the URL for the composite key
+    #        ...
+    #        return composite_key_url
 
-#    def get_employee_detail_url(self, obj):
-#        # generate the URL for the composite key
-#        ...
-#        return composite_key_url
-   
     class Meta:
         model = Task
         fields = "__all__"
