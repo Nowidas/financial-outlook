@@ -25,3 +25,5 @@ Later:
 [ ] Fix types (TS)
 [ ] Chores (not for now -> rushing MVP version)
 [ ] Testing backend and frontend
+[ ] Adding from file
+[ ] Internationalization (i18next ?)
