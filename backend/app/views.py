@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.db.models import Count
 import requests
 
 from rest_framework import viewsets, views, generics
@@ -16,6 +17,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from django_filters import rest_framework as filters
 
 from app.serializers import (
     AccountSerializer,
@@ -107,10 +110,35 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
+class TransactionFilter(filters.FilterSet):
+    amount = filters.RangeFilter()
+    category = filters.CharFilter(
+        field_name="account__agreements__category__custom_name"
+    )
+    value_date = filters.DateFromToRangeFilter()
+
+    class Meta:
+        model = Transactions
+        fields = ["amount", "value_date"]
+
+
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transactions.objects.all()
     serializer_class = TransactionsSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = TransactionFilter
+
+    # @action(detail=False)
+    # def sum(self, request):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #     by = request.query_params.get("by")
+    #     print(by)
+    #     queryset = queryset.aggregate(Count("account__account_id"))
+    #     # page = self.paginate_queryset(queryset)
+    #     # if page is not None:
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer)
 
 
 class AccountViewSet(viewsets.ModelViewSet):
