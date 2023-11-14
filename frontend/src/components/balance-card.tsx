@@ -70,8 +70,8 @@ export const BalanceCard = () => {
               </PopoverTrigger>
               <PopoverContent>
                 {allTargets.map((val) => (
-                  <div className="flex flex-row w-full items-center space-x-2 font-semibold">
-                    <Checkbox key={val.name} id={val.name} checked={val.is_checked} onCheckedChange={(checked) => {
+                  <div key={val.name} className="flex flex-row w-full items-center space-x-2 font-semibold">
+                    <Checkbox id={val.name} checked={val.is_checked} onCheckedChange={(checked) => {
                       return setAllTargets(allTargets.map((el) => (el.name === val.name ? { name: el.name, is_checked: checked } : el)))
                     }} />
                     <label id={val.name} htmlFor={val.name}>{val.name}</label>

@@ -5,6 +5,7 @@ import { useDocumentTitleComponent } from "@/components/global";
 import Layout from "../layout/dashboad_layout";
 import { ConnectionScrollList } from "@/components/ui/connectionScrollList";
 import { BalanceCard } from "@/components/balance-card";
+import { ChartBalanceCard } from "@/components/chart-balance-card";
 
 import { TransactionsCard } from "@/components/transations-card"
 
@@ -30,6 +31,7 @@ export const AggrementsPage: React.FC<IProps> = ({ msg }) => {
       <TransactionsCard />
       <ConnectionScrollList className="" />
       <BalanceCard />
+      <ChartBalanceCard />
     </Layout>
   );
 };
