@@ -18,6 +18,7 @@ import { ReloadIcon } from "@radix-ui/react-icons"
 import axiosSesion from "./helpers/sesioninterceptor"
 import toast from "react-hot-toast"
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
 
 
 
@@ -25,6 +26,8 @@ import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-quer
 export default function ConnectionsRunFetchButton({
 
 }) {
+  const navigate = useNavigate();
+
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [startingDate, setStartingDate] = useState(new Date())
@@ -59,6 +62,7 @@ export default function ConnectionsRunFetchButton({
       console.log('Task finished')
       setEnabled(false)
       setDeleteOpen(false)
+      navigate(0)
     }
   }, [data, enabled])
 
