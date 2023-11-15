@@ -8,6 +8,7 @@ import { BalanceCard } from "@/components/balance-card";
 import { ChartBalanceCard } from "@/components/chart-balance-card";
 
 import { TransactionsCard } from "@/components/transations-card"
+import { ChartInOutcomesCard } from "../chart-expensives-incomes-card";
 
 interface IProps {
   msg: string;
@@ -32,6 +33,7 @@ export const AggrementsPage: React.FC<IProps> = ({ msg }) => {
       <ConnectionScrollList className="" />
       <BalanceCard />
       <ChartBalanceCard />
+      <ChartInOutcomesCard />
     </Layout>
   );
 };
