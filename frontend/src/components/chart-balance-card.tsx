@@ -3,6 +3,7 @@ import axiosSesion from "./helpers/sesioninterceptor"
 import { DataTable } from "./transactions-data-table"
 import { useEffect, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { format } from 'date-fns'
 import {
   Card,
   CardContent,
@@ -34,44 +35,48 @@ export const ChartBalanceCard = () => {
     if (allTargets.length == 0) {
       return
     }
-    const initialResponse = await axiosSesion.get('http://127.0.0.1:8000/transactions/?value_date_year=2023');
-    const pageCount = Math.ceil(initialResponse.data.count / 10);
+    const targetYear = new Date().getFullYear();
+    const monthDays = Array.from({ length: 12 }, (_, index) => {
+      const firstDay = new Date(targetYear, index, 1);
+      const lastDay = new Date(targetYear, index + 1, 0);
+      return [firstDay, lastDay];
 
-    const requests = Array.from({ length: pageCount }, (_, index) =>
-      axiosSesion.get(`http://127.0.0.1:8000/transactions/?value_date_year=2023&page=${index + 1}`)
-    );
+    });
+    const requests = monthDays.map((months) => {
+      return allTargets.map((target) => {
+        return axiosSesion.get(`http://127.0.0.1:8000/transactions/?category=${target.name}&value_date_after=${format(months[0], 'yyyy-MM-dd')}&value_date_before=${format(months[1], 'yyyy-MM-dd')}`)
+          .then((resp) => {
+            return {
+              balance_after: resp.data.results[0]?.balance_after ?? null,
+              month: months[0].getMonth() + 1,
+              category: target.name
+            }
+          })
+      });
+    });
 
-    const responses = await Promise.all(requests);
-    const allTransactions = responses.reduce((acc, res) => {
-      acc.push(...res.data.results);
-      return acc;
-    }, []);
+    const responses = await Promise.all(requests.flat());
+    console.warn(responses);
 
-    // Processing data to get balances for each category in each month
-    const formattedData = [];
-
-    allTransactions.forEach(transaction => {
-      const date = new Date(transaction.value_date); // assuming there's a date property in the transaction object
-      const month = date.getMonth() + 1; // +1 to convert from 0-indexed to 1-indexed month
-      const category = transaction.account.agreements.category.custom_name; // assuming category information is present in transactions
-      let existingMonth = formattedData.find(entry => entry.month === month);
+    const transformedArray = responses.reduce((acc, entry) => {
+      const { month, category, balance_after } = entry;
+      if (!balance_after) {
+        return acc;
+      }
+      const existingMonth = acc.find(item => item.month === month);
 
       if (!existingMonth) {
-        existingMonth = {
-          month: month
-        };
-        formattedData.push(existingMonth);
+        acc.push({ month, [category]: balance_after });
+      } else {
+        existingMonth[category] = balance_after;
       }
 
-      if (!existingMonth[`${category}`]) {
-        existingMonth[`${category}`] = 0;
-      }
+      return acc;
+    }, []);
+    console.warn(transformedArray);
 
-      existingMonth[`${category}`] += parseFloat(transaction.amount); // Assuming amount signifies balance change
-    });
-    // Now, formattedData contains the balances for each category in each month
-    console.warn(formattedData)
-    setData(formattedData);
+
+    setData(transformedArray);
   }
 
   useEffect(() => {
@@ -89,7 +94,8 @@ export const ChartBalanceCard = () => {
       <Card className="w-[1000px]">
         <CardHeader className="flex flex-row space-y-0 ">
           <div className="w-full">
-            <CardTitle className="text-3xl font-bold tracking-tight">Net profit</CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight">Monthly Balance</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">Balance on the end of each month per connected account</CardDescription>
           </div>
           <div className="flex flex-row space-x-1">
             <Button disabled={!data.length} variant="outline" className="p-1 w-10 h-10"><RefreshCcw /></Button>
@@ -113,13 +119,15 @@ export const ChartBalanceCard = () => {
                       return (
                         <div className="rounded-lg border bg-background p-2 shadow-sm">
                           <div className="grid grid-cols-2 gap-2">
-                            {[1, 2].map((el, idx) => (
+                            {allTargets.map((el, idx) => (
                               <div key={idx} className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground">
                                   {payload[idx].dataKey}
                                 </span>
                                 <span className="font-bold">
-                                  {payload[idx].value}
+                                  {Intl.NumberFormat('pl-PL', {
+                                    style: 'currency', currency: 'PLN',
+                                  }).format(payload[idx].value)}
                                 </span>
                               </div>
                             ))}
@@ -142,18 +150,23 @@ export const ChartBalanceCard = () => {
                       dataKey={key}
                       activeDot={{
                         r: 6,
-                        style: { fill: "black", opacity: 0.25 },
+                        style: { fill: "hsl(var(--primary))", opacity: 0.25 },
                       }}
                       style={
                         {
-                          stroke: "black",
-                          opacity: 0.25,
+                          stroke: "hsl(var(--primary))",
+                          opacity: 0.8,
                         } as React.CSSProperties
                       }
                     />
                   )
                 })}
-                {data.length && <ReferenceLine y={0} stroke="red" />}
+                {data.length && <ReferenceLine y={0} stroke="hsl(var(--muted))" />}
+                {data.length && <XAxis dataKey="month" opacity={0} tick={({ payload, x, y, index }) => (
+                  <text x={x} y={y - 10} dy={16} fill="#666" textAnchor="middle">
+                    {payload.value}
+                  </text>
+                )} />}
               </LineChart>
             </ResponsiveContainer>
           </div>
