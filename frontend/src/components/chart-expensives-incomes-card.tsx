@@ -25,29 +25,68 @@ export const ChartInOutcomesCard = () => {
 
   const initTarget = () => {
     return axiosSesion
-      .get('http://127.0.0.1:8000/category')
-      .then((resp) => {
-        setAllTargets(resp.data.results.map((val) => ({ name: val.custom_name, is_checked: true })));
-      })
+      .get('http://127.0.0.1:8000/transactions/?category=${target.name}&amount_min=0&value_date_after=${format(months[0], 'yyyy - MM - dd')}&value_date_before=${format(months[1], 'yyyy - MM - dd')}`)
+        .then((resp) => {
+          setAllTargets(resp.data.results.map((val) => ({ name: val.custom_name, is_checked: true })));
+        })
   }
 
   const getYearIncomeOutcome = async () => {
     if (allTargets.length == 0) {
       return
     }
-    const targetYear = new Date().getFullYear();
-    const monthDays = Array.from({ length: 12 }, (_, index) => {
-      const firstDay = new Date(targetYear, index, 1);
-      const lastDay = new Date(targetYear, index + 1, 0);
-      return [firstDay, lastDay];
+    const currentYear = new Date().getFullYear();
 
-    });
+    // First day of the year
+    const firstDayOfYear = new Date(currentYear, 0, 1);
+
+    // Last day of the year
+    const lastDayOfYear = new Date(currentYear, 11, 31);
+
+    try {
+      const initialResponse = await axiosSesion.get(`http://127.0.0.1:8000/transactions/?value_date_after=${format(firstDayOfYear, 'yyyy-MM-dd')}&value_date_before=${format(lastDayOfYear, 'yyyy-MM-dd')}`);
+      const pageCount = Math.ceil(initialResponse.data.count / 10);
+
+      const requests = Array.from({ length: pageCount }, (_, index) =>
+        axiosSesion.get(`http://127.0.0.1:8000/transactions/?value_date_year=2023&page=${index + 1}`)
+      );
+
+      const responses = await Promise.all(requests);
+      const allTransactions = responses.reduce((acc, res) => {
+        acc.push(...res.data.results);
+        return acc;
+      }, []);
+
+      const transformedArray = allTransactions.reduce((acc, entry) => {
+        const month = new Date(entry.value_date).getMonth();
+        const amount = entry.amount;
+        const category = entry.account.category.custom_name;
+
+        const existingMonth = acc.find(item => item.month === month);
+
+        if (!existingMonth) {
+          acc.push({ month, [category]: balance_after });
+        } else {
+          existingMonth[category] = balance_after;
+        }
+
+        return acc;
+      }, []);
+
+      // Process or use allTransactions here
+      console.warn(allTransactions);
+    } catch (error) {
+      // Handle errors
+      console.error("Error fetching transactions:", error);
+    }
+
+    const initResp = await axiosSesion.get()
     const requests = monthDays.map((months) => {
       return allTargets.map((target) => {
         return axiosSesion.get(`http://127.0.0.1:8000/transactions/?category=${target.name}&amount_min=0&value_date_after=${format(months[0], 'yyyy-MM-dd')}&value_date_before=${format(months[1], 'yyyy-MM-dd')}`)
           .then((resp) => {
             return {
-              balance_after: resp.data.results[0]?.amount ?? 0,
+              amount: resp.data.results[0]?.amount ?? 0,
               month: months[0].getMonth() + 1,
               category: target.name
             }
