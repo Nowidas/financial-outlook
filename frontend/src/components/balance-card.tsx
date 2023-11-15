@@ -62,6 +62,7 @@ export const BalanceCard = () => {
         <CardHeader className="flex flex-row space-y-0 ">
           <div className="w-full">
             <CardTitle className="text-3xl font-bold tracking-tight">Accounts Balance</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">Currently available resources</CardDescription>
           </div>
           <div className="flex flex-row space-x-1">
             <Popover>
