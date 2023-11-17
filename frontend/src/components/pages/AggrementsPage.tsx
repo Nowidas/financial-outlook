@@ -24,13 +24,13 @@ interface MyData {
 }
 
 export const AggrementsPage: React.FC<IProps> = ({ msg }) => {
-  useDocumentTitleComponent({ title: 'Spotify - AggrementsPage' })
+  useDocumentTitleComponent({ title: 'Financial Outlook' })
 
 
   return (
     <Layout>
       <TransactionsCard />
-      <ConnectionScrollList className="" />
+      <ConnectionScrollList />
       <BalanceCard />
       <ChartBalanceCard />
       <ChartInOutcomesCard />

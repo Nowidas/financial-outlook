@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosSesion from "@/components/helpers/sesioninterceptor";
 import useCrud from "@/components/hooks/useCrud"
-import { Modal } from "../ui/modal";
 import { useAgreementsModal } from "../hooks/use-aggrements-modal";
 import toast from "react-hot-toast";
 import { Skeleton } from "../ui/skeleton";
@@ -12,7 +11,6 @@ import { format } from 'date-fns'
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -23,15 +21,12 @@ import {
   Pencil,
   RefreshCcw,
   Calendar,
-  ArrowBigLeftIcon,
-  ArrowBigRightIcon,
-  ArrowRightIcon,
+
 } from "lucide-react"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -42,10 +37,7 @@ import { Separator } from "./separator";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import ConnectionsRunFetchButton from "../connections-runFetch-button";
 
-export function ConnectionScrollList({
-  className,
-  ...props
-}): React.HTMLAttributes<HTMLElement> {
+export function ConnectionScrollList(): React.HTMLAttributes<HTMLElement> {
   const navigate = useNavigate();
 
   const onOpen = useAgreementsModal((state) => state.onOpen);
@@ -144,8 +136,7 @@ export function ConnectionScrollList({
                   "w-[200px]",
                   el.status != "LN"
                     ? "text-muted-foreground"
-                    : null,
-                  className
+                    : null
                 )}>
                   <TableCell>
                     <AccountNameSwitcher cur_item={el} items={CategoryData.dataCRUD.results} fetchData={fetchAll} />
