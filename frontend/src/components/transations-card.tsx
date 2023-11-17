@@ -1,15 +1,11 @@
-import { toast } from "react-hot-toast"
-import axiosSesion from "./helpers/sesioninterceptor"
-import { Transactions, columns } from "./transactions-column"
+import { columns } from "./transactions-column"
 import { DataTable } from "./transactions-data-table"
-import { useEffect, useMemo, useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { PaginationState } from "@tanstack/react-table"
+import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"

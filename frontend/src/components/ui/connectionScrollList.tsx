@@ -40,7 +40,6 @@ import AccountNameSwitcher from "@/components/account-name-switcher"
 import AccountDeleteButton from "../account-delete-button";
 import { Separator } from "./separator";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { PaginationState } from "@tanstack/react-table";
 import ConnectionsRunFetchButton from "../connections-runFetch-button";
 
 export function ConnectionScrollList({

@@ -1,22 +1,16 @@
-import { toast } from "react-hot-toast"
 import axiosSesion from "./helpers/sesioninterceptor"
-import { DataTable } from "./transactions-data-table"
-import { useEffect, useMemo, useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 import { format } from 'date-fns'
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "./ui/button"
-import { DollarSign, FilterIcon, RefreshCcw } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Line, LineChart, ResponsiveContainer, Tooltip, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Area, Legend, Bar, BarChart } from "recharts"
+import { RefreshCcw } from "lucide-react"
+import { ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts"
 
 
 export const ChartInOutcomesCard = () => {

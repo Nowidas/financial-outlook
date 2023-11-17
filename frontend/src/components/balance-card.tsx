@@ -1,13 +1,9 @@
-import { toast } from "react-hot-toast"
 import axiosSesion from "./helpers/sesioninterceptor"
-import { DataTable } from "./transactions-data-table"
-import { useEffect, useMemo, useState } from "react"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -18,7 +14,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 
 export const BalanceCard = () => {
-  const [loading, setLoading] = useState(false)
   const [data, setData] = useState([])
   const [allTargets, setAllTargets] = useState([])
 
