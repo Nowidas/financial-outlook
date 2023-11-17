@@ -9,7 +9,7 @@ export function MainNav({
     const navigate = useNavigate();
     return (
         <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
-            <Link className={cn('text-sm font-medium transition-colors hover:font-bold')} onClick={() => { navigate('/'); }}> AggrementsPage </Link>
+            <Link className={cn('text-sm font-medium transition-colors hover:font-bold')} onClick={() => { navigate('/'); }}> DashboardPage </Link>
         </nav>
     )
 }

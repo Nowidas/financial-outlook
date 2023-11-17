@@ -23,7 +23,7 @@ interface MyData {
   institution_id: string;
 }
 
-export const AggrementsPage: React.FC<IProps> = ({ msg }) => {
+export const DashboardPage: React.FC<IProps> = ({ msg }) => {
   useDocumentTitleComponent({ title: 'Financial Outlook' })
 
 

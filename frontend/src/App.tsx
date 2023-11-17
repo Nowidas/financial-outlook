@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
-import { HomePage, AggrementsPage, Login, Logout } from "@/components/pages";
+import { HomePage, DashboardPage, Login, Logout } from "@/components/pages";
 import { MainMenuGlobalComponent } from "@/components/global/MainMenuGlobalComponent";
 import { BrowserRouter as Router, Routes, Route }
   from 'react-router-dom';
@@ -26,7 +26,7 @@ function App() {
             <ModalProvider />
             <Router>
               <Routes>
-                <Route path='/' element={<AggrementsPage msg="AggrementsPage" />} />
+                <Route path='/' element={<DashboardPage msg="DashboardPage" />} />
                 <Route path='/login' element={<Login msg="LoginPage" />} />
                 <Route path='/logout' element={<Logout />} />
               </Routes>

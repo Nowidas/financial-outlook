@@ -1,4 +1,4 @@
 export * from './HomePage';
-export * from './AggrementsPage';
+export * from './DashboardPage';
 export * from './login';
 export * from './logout';
