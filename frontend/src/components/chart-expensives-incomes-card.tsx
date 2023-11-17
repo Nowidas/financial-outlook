@@ -16,7 +16,7 @@ import { Button } from "./ui/button"
 import { DollarSign, FilterIcon, RefreshCcw } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Line, LineChart, ResponsiveContainer, Tooltip, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Area, Legend, Bar } from "recharts"
+import { Line, LineChart, ResponsiveContainer, Tooltip, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Area, Legend, Bar, BarChart } from "recharts"
 
 
 export const ChartInOutcomesCard = () => {
@@ -25,16 +25,17 @@ export const ChartInOutcomesCard = () => {
 
   const initTarget = () => {
     return axiosSesion
-      .get('http://127.0.0.1:8000/transactions/?category=${target.name}&amount_min=0&value_date_after=${format(months[0], 'yyyy - MM - dd')}&value_date_before=${format(months[1], 'yyyy - MM - dd')}`)
-        .then((resp) => {
-          setAllTargets(resp.data.results.map((val) => ({ name: val.custom_name, is_checked: true })));
-        })
+      .get('http://127.0.0.1:8000/category')
+      .then((resp) => {
+        setAllTargets(resp.data.results.map((val) => ({ name: val.custom_name, is_checked: true })));
+      })
   }
 
   const getYearIncomeOutcome = async () => {
-    if (allTargets.length == 0) {
-      return
+    if (allTargets.length === 0) {
+      return;
     }
+
     const currentYear = new Date().getFullYear();
 
     // First day of the year
@@ -57,65 +58,38 @@ export const ChartInOutcomesCard = () => {
         return acc;
       }, []);
 
+      console.warn(allTransactions);
       const transformedArray = allTransactions.reduce((acc, entry) => {
         const month = new Date(entry.value_date).getMonth();
-        const amount = entry.amount;
-        const category = entry.account.category.custom_name;
+        const amount = parseFloat(entry.amount) || 0; // Parse amount as a float or default to 0
+        const category = entry.account.agreements.category.custom_name;
 
         const existingMonth = acc.find(item => item.month === month);
 
         if (!existingMonth) {
-          acc.push({ month, [category]: balance_after });
+          acc.push({
+            month,
+            [`${category}_expenses`]: amount < 0 ? amount : 0,
+            [`${category}_incomes`]: amount >= 0 ? amount : 0,
+          });
         } else {
-          existingMonth[category] = balance_after;
+          if (amount < 0) {
+            existingMonth[`${category}_expenses`] = (existingMonth[`${category}_expenses`] || 0) + amount;
+          } else {
+            existingMonth[`${category}_incomes`] = (existingMonth[`${category}_incomes`] || 0) + amount;
+          }
         }
 
         return acc;
       }, []);
 
       // Process or use allTransactions here
-      console.warn(allTransactions);
+      console.warn(transformedArray);
+      setData(transformedArray);
     } catch (error) {
       // Handle errors
       console.error("Error fetching transactions:", error);
     }
-
-    const initResp = await axiosSesion.get()
-    const requests = monthDays.map((months) => {
-      return allTargets.map((target) => {
-        return axiosSesion.get(`http://127.0.0.1:8000/transactions/?category=${target.name}&amount_min=0&value_date_after=${format(months[0], 'yyyy-MM-dd')}&value_date_before=${format(months[1], 'yyyy-MM-dd')}`)
-          .then((resp) => {
-            return {
-              amount: resp.data.results[0]?.amount ?? 0,
-              month: months[0].getMonth() + 1,
-              category: target.name
-            }
-          })
-      });
-    });
-
-    const responses = await Promise.all(requests.flat());
-    console.warn(responses);
-
-    const transformedArray = responses.reduce((acc, entry) => {
-      const { month, category, balance_after } = entry;
-      if (!balance_after) {
-        return acc;
-      }
-      const existingMonth = acc.find(item => item.month === month);
-
-      if (!existingMonth) {
-        acc.push({ month, [category]: balance_after });
-      } else {
-        existingMonth[category] = balance_after;
-      }
-
-      return acc;
-    }, []);
-    console.warn(transformedArray);
-
-
-    setData(transformedArray);
   }
 
   useEffect(() => {
@@ -133,8 +107,8 @@ export const ChartInOutcomesCard = () => {
       <Card className="w-[1000px]">
         <CardHeader className="flex flex-row space-y-0 ">
           <div className="w-full">
-            <CardTitle className="text-3xl font-bold tracking-tight">Incomes and Expenses</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">Incomes and Expenses</CardDescription>
+            <CardTitle className="text-3xl font-bold tracking-tight">Net Income</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">Sum of all transaction for given account</CardDescription>
           </div>
           <div className="flex flex-row space-x-1">
             <Button disabled={!data.length} variant="outline" className="p-1 w-10 h-10"><RefreshCcw /></Button>
@@ -143,22 +117,31 @@ export const ChartInOutcomesCard = () => {
         <CardContent>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={data}
+              <BarChart
+                data={data.reverse()}
+                stackOffset="sign"
                 margin={{
                   top: 5,
                   right: 10,
                   left: 10,
-                  bottom: 0,
+                  bottom: 20,
                 }}
               >
+                <CartesianGrid strokeDasharray="3 3" />
+
+                <XAxis dataKey="month" opacity={0} tick={({ payload, x, y, index }) => (
+                  <text x={x} y={y - 10} dy={16} fill="#666" textAnchor="middle">
+                    {payload.value}
+                  </text>
+                )} />
+                <YAxis />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
                         <div className="rounded-lg border bg-background p-2 shadow-sm">
                           <div className="grid grid-cols-2 gap-2">
-                            {allTargets.map((el, idx) => (
+                            {allTargets.concat(allTargets).map((el, idx) => (
                               <div key={idx} className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground">
                                   {payload[idx].dataKey}
@@ -177,36 +160,18 @@ export const ChartInOutcomesCard = () => {
                     return null;
                   }}
                 />
-                {data.length && Object.keys(data[0]).map((key, idx) => {
-                  if (key == "month") {
-                    return;
-                  }
+                {allTargets.map((target, idx) => ['incomes', 'expenses'].map((val, idx) => {
                   return (
-                    <Line
-                      key={idx}
-                      type="monotone"
-                      strokeWidth={2}
-                      dataKey={key}
-                      activeDot={{
-                        r: 6,
-                        style: { fill: "hsl(var(--primary))", opacity: 0.25 },
-                      }}
-                      style={
-                        {
-                          stroke: "hsl(var(--primary))",
-                          opacity: 0.8,
-                        } as React.CSSProperties
-                      }
+                    <Bar
+                      key={`${target.name}_${val}`}
+                      dataKey={`${target.name}_${val}`}
+                      stackId={`${target.name}`}
+                      fill={val === 'expenses' ? 'hsl(var(--primary))' : 'hsl(var(--accent))'}
                     />
                   )
-                })}
-                {data.length && <ReferenceLine y={0} stroke="hsl(var(--muted))" />}
-                {data.length && <XAxis dataKey="month" opacity={0} tick={({ payload, x, y, index }) => (
-                  <text x={x} y={y - 10} dy={16} fill="#666" textAnchor="middle">
-                    {payload.value}
-                  </text>
-                )} />}
-              </LineChart>
+                }))}
+
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
