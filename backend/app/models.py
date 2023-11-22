@@ -1,4 +1,8 @@
 from datetime import datetime
+
+import re
+from django_regex.fields import RegexField
+
 from django.db import models
 
 
@@ -52,7 +56,7 @@ class TypeRule(models.Model):
         blank=True,
         null=True,
     )
-    rule = models.CharField(max_length=200, unique=True)  #! Try django-regex field
+    rule = RegexField(flags=re.I)
 
     def __str__(self):
         return str(self.rule)

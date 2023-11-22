@@ -61,8 +61,23 @@ class AccountSerializer(serializers.HyperlinkedModelSerializer):
         fields = "__all__"
 
 
+class TypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Type
+        fields = "__all__"
+
+
+class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
+    rule = TypeSerializer()
+
+    class Meta:
+        model = TypeRule
+        fields = "__all__"
+
+
 class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
     account = AccountSerializer()
+    type = TypeSerializer()
 
     class Meta:
         model = Transactions
@@ -78,18 +93,6 @@ class TransationsAggregaredSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transactions
         fields = ("month", "year", "sum_amount", "is_income")
-
-
-class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = TypeRule
-        fields = "__all__"
-
-
-class TypeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Type
-        fields = "__all__"
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
