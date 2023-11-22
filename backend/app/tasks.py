@@ -12,7 +12,7 @@ import pandas as pd
 
 from celery import shared_task, group, chord
 
-from app.models import Agreements, Task, Transactions, Account, TypeRule
+from app.models import Agreements, Task, Transactions, Account, Type, TypeRule
 
 
 @shared_task(bind=True)
@@ -25,7 +25,7 @@ def add(self):
 def task_pool(self, agreement_id, access_token):
     # time.sleep(5)
     # print("Waited 5s")
-    # return True
+    return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
@@ -150,15 +150,34 @@ def finish_pool(self, pass_val):
         len(new_rules),
     )
     update_list = []
+
+    # Find or create the "internal transfer" rule
+    internal_transfer_type = Type.objects.all().filter(type="Internal transfer").first()
+    if not internal_transfer_type:
+        # If the type doesn't exist, create it
+        internal_transfer_type = Type.objects.create(type="Internal transfer")
+        internal_transfer_type.save()
+
     for transaction in new_transactions:
+        if (
+            transaction.debtor_account
+            or transaction.creditor_account
+            or transaction.debtor_name
+            or transaction.creditor_name
+        ):
+            transaction.type = internal_transfer_type
+            update_list.append(transaction)
+            continue
+
         for rule_obj in all_rules:
             if rule_obj.rule.search(transaction.description):
-                transaction.type = rule_obj.type
+                transaction.type = internal_transfer_type
                 update_list.append(transaction)
                 break
         else:
             transaction.type = None
             update_list.append(transaction)
+
     Transactions.objects.bulk_update(update_list, ["type"])
 
     # Step 6: Closing task
