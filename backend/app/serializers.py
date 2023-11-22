@@ -68,7 +68,7 @@ class TypeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
-    rule = TypeSerializer()
+    type = TypeSerializer()
 
     class Meta:
         model = TypeRule
