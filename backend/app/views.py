@@ -1,3 +1,4 @@
+import os
 import datetime
 import json
 from django.forms import MultipleChoiceField
@@ -212,8 +213,8 @@ class GetGoCardlessToken(views.APIView):
     def get(self, request, format=None):
         response = {}
         payload = {
-            "secret_id": "55334415-bb5b-472d-8524-08c656f5e3c2",
-            "secret_key": "46e8542c1eebbd02771cd3fae01a4584fd9bbc8f6868f4d8429b6efefb6a82b88f6d2625441e2090af38b1f44371199a47274aa58f4e7152cd8aa3061849336e",
+            "secret_id": os.environ.get("GOCARDLESS_SECRET_ID"),
+            "secret_key": os.environ.get("GOCARDLESS_SECRET_KEY"),
         }
         headers = {"accept": "application/json", "Content-Type": "application/json"}
 
