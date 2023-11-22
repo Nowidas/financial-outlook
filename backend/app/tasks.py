@@ -1,6 +1,7 @@
 # Create your tasks here
 
 import os
+import re
 import time
 import datetime
 import random
@@ -11,7 +12,7 @@ import pandas as pd
 
 from celery import shared_task, group, chord
 
-from app.models import Agreements, Task, Transactions, Account
+from app.models import Agreements, Task, Transactions, Account, TypeRule
 
 
 @shared_task(bind=True)
@@ -24,7 +25,7 @@ def add(self):
 def task_pool(self, agreement_id, access_token):
     # time.sleep(5)
     # print("Waited 5s")
-    # return True
+    return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
@@ -52,7 +53,6 @@ def task_pool(self, agreement_id, access_token):
     if not account_obj:
         account_obj = Account.objects.create(account_id=account_id)
 
-    
     agreement_element.status = data.get("status")
     agreement_element.account = account_obj
     agreement_element.save()
@@ -97,9 +97,7 @@ def task_pool(self, agreement_id, access_token):
     )
     #! df["transactionsAccount"] = account_id
     df["transaction_id"] = (
-        account_id
-        + ":"
-        + df["transactionId"].apply(lambda x: str(x).replace(";", ""))
+        account_id + ":" + df["transactionId"].apply(lambda x: str(x).replace(";", ""))
     )
     df.columns = df.columns.str.lower()
     df["debtor_name"] = df["debtorname"]
@@ -121,41 +119,72 @@ def task_pool(self, agreement_id, access_token):
             "description",
         ]
     )
-    df = df.replace(np.nan,'',regex=True)
-    transaction_book = df.to_dict(orient='records')
-    print(transaction_book) #! continuity broken
+    df = df.replace(np.nan, "", regex=True)
+    transaction_book = df.to_dict(orient="records")
+    print(transaction_book)  #! continuity broken
 
     # Step 5: Save to db transactions that are not already saved
     objs = Transactions.objects.bulk_create(
-        [Transactions(account=account_obj, **transaction) for transaction in transaction_book],
-        ignore_conflicts=True
+        [
+            Transactions(account=account_obj, **transaction)
+            for transaction in transaction_book
+        ],
+        ignore_conflicts=True,
     )
+
 
 @shared_task(bind=True)
 def finish_pool(self, pass_val):
+    # Step 7: Update type for new transactions
+    new_rules = TypeRule.objects.all().filter(new_flag=True)
+    if new_rules:
+        new_transactions = Transactions.objects.all()
+        new_rules.update(new_flag=False)
+    else:
+        new_transactions = Transactions.objects.all().filter(type=None)
+    all_rules = TypeRule.objects.all().order_by("importance")
+    print(
+        "[TYPE_RULE_CHECK] : Transactions to edit",
+        len(new_transactions),
+        "Rules to check",
+        len(new_rules),
+    )
+    update_list = []
+    for transaction in new_transactions:
+        for rule_obj in all_rules:
+            if rule_obj.rule.search(transaction.description):
+                transaction.type = rule_obj.type
+                update_list.append(transaction)
+                break
+        else:
+            transaction.type = None
+            update_list.append(transaction)
+    Transactions.objects.bulk_update(update_list, ["type"])
+
     # Step 6: Closing task
     task = Task.objects.all().filter(status="Working").first()
     if pass_val:
-        task.status = 'Done'
-        print('task saved as done')
+        task.status = "Done"
+        print("task saved as done")
     else:
-        print('task saved as error')
-        task.status = 'Error'
-        
+        print("task saved as error")
+        task.status = "Error"
+
     task.date_done = datetime.datetime.now(datetime.timezone.utc)
     task.save()
+
 
 @shared_task(bind=True)
 def fetch_transactions_data(self):
     # run task if not running and log everything to db
     task = Task.objects.all().filter(status="Working").first()
     if task:
-        print('task already working')
+        print("task already working")
         return False
-    
+
     task = Task.objects.create()
     task.save()
-    print('task saved as working')
+    print("task saved as working")
 
     # Step 1: load or get secret to api
     headers = {"accept": "application/json", "Content-Type": "application/json"}
@@ -184,12 +213,11 @@ def fetch_transactions_data(self):
             task_pool.s(query_element.agreement_id, YOUR_ACCESS_TOKEN)
             for query_element in query
         ],
-        finish_pool.s()
-
+        finish_pool.s(),
     )
     res = run_chord()
     return True
-    
+
 
 @shared_task(bind=True)
 def delete_expired_agreements(self):

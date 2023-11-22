@@ -57,6 +57,8 @@ class TypeRule(models.Model):
         null=True,
     )
     rule = RegexField(flags=re.I)
+    importance = models.IntegerField(default=0)
+    new_flag = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.rule)
