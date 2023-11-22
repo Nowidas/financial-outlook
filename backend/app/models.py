@@ -84,6 +84,15 @@ class Transactions(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
+        related_name="transactions",
+    )
+    type_manual = models.ForeignKey(
+        Type,
+        default=None,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="manual_transactions",
     )
 
     def __str__(self) -> str:

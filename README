@@ -37,3 +37,4 @@ Later:
 [ ] Testing backend and frontend
 [ ] Adding from file
 [ ] Internationalization (i18next ?)
+[ ] Change crucial prints to logger

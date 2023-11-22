@@ -25,7 +25,7 @@ def add(self):
 def task_pool(self, agreement_id, access_token):
     # time.sleep(5)
     # print("Waited 5s")
-    return True
+    # return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
@@ -138,10 +138,12 @@ def finish_pool(self, pass_val):
     # Step 7: Update type for new transactions
     new_rules = TypeRule.objects.all().filter(new_flag=True)
     if new_rules:
-        new_transactions = Transactions.objects.all()
+        new_transactions = Transactions.objects.all().filter(type_manual__isnull=True)
         new_rules.update(new_flag=False)
     else:
-        new_transactions = Transactions.objects.all().filter(type=None)
+        new_transactions = Transactions.objects.all().filter(
+            type=None, type_manual__isnull=True
+        )
     all_rules = TypeRule.objects.all().order_by("importance")
     print(
         "[TYPE_RULE_CHECK] : Transactions to edit",
@@ -157,6 +159,11 @@ def finish_pool(self, pass_val):
         # If the type doesn't exist, create it
         internal_transfer_type = Type.objects.create(type="Internal transfer")
         internal_transfer_type.save()
+    none_type = Type.objects.all().filter(type="Not assign").first()
+    if not none_type:
+        # If the type doesn't exist, create it
+        none_type = Type.objects.create(type="Not assign")
+        none_type.save()
 
     for transaction in new_transactions:
         if (
@@ -171,11 +178,11 @@ def finish_pool(self, pass_val):
 
         for rule_obj in all_rules:
             if rule_obj.rule.search(transaction.description):
-                transaction.type = internal_transfer_type
+                transaction.type = rule_obj.type
                 update_list.append(transaction)
                 break
         else:
-            transaction.type = None
+            transaction.type = none_type
             update_list.append(transaction)
 
     Transactions.objects.bulk_update(update_list, ["type"])
