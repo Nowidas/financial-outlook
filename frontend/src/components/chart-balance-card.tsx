@@ -50,7 +50,6 @@ export const ChartBalanceCard = () => {
     });
 
     const responses = await Promise.all(requests.flat());
-    console.warn(responses);
 
     const transformedArray = responses.reduce((acc, entry) => {
       const { month, category, balance_after } = entry;
@@ -67,8 +66,6 @@ export const ChartBalanceCard = () => {
 
       return acc;
     }, []);
-    console.warn(transformedArray);
-
 
     setData(transformedArray);
   }

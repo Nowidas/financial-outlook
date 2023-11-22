@@ -152,10 +152,8 @@ export const AgreementsModal = () => {
           .then((response) => {
             const data = response.data
             console.log(JSON.stringify(response.data));
-            console.warn(JSON.stringify(response.data.id));
             const expires_at = new Date(data.created)
             expires_at.setDate(expires_at.getDate() + parseInt(val.transaction_total_days));
-            console.warn(expires_at)
             const responseData = {
               "agreement_id": data.id,
               "created_at": data.created,

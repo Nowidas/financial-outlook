@@ -15,6 +15,7 @@
     [X] Store and show last CeleryJob date
     [X] *BigTask* Group by category -- backend
 [ ] Transaction list - *Card*
+    [ ] Identify if the transactions is internal (between added account) and sign it as Transfer Transaction (exclude from incomes and expensive) 
     [ ] Table with *good pagination* -> infinite scroll
     [ ] Action buttons for (change_type, disable_from_dashboard, ...) transactions
     [ ] Add custom transaction (not from connections)
