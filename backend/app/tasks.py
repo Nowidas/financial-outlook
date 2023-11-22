@@ -25,7 +25,7 @@ def add(self):
 def task_pool(self, agreement_id, access_token):
     # time.sleep(5)
     # print("Waited 5s")
-    return True
+    # return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
