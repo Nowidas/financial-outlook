@@ -1,5 +1,6 @@
 import datetime
 import json
+from django.forms import MultipleChoiceField
 
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
@@ -8,7 +9,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.db.models import Count
+from django.db.models.functions import ExtractMonth, ExtractYear
+from django.db.models import Sum, Case, When, Value
 import requests
 
 from rest_framework import viewsets, views, generics
@@ -27,6 +29,7 @@ from app.serializers import (
     AgreementsSerializer,
     CategorySerializer,
     TransactionsSerializer,
+    TransationsAggregaredSerializer,
     TaskSerializer,
 )
 from app.models import Account, Agreements, Category, Transactions, Task
@@ -112,14 +115,22 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class TransactionFilter(filters.FilterSet):
     amount = filters.RangeFilter()
+    # Custom multiple choice filter for categories
     category = filters.CharFilter(
-        field_name="account__agreements__category__custom_name"
+        method="filter_category",
     )
+
+    def filter_category(self, queryset, name, value):
+        categories = value.split(",")
+        return queryset.filter(
+            account__agreements__category__custom_name__in=categories
+        )
+
     value_date = filters.DateFromToRangeFilter()
 
     class Meta:
         model = Transactions
-        fields = ["amount", "value_date"]
+        fields = ["amount", "value_date", "category"]
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
@@ -129,16 +140,32 @@ class TransactionViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = TransactionFilter
 
-    # @action(detail=False)
-    # def sum(self, request):
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #     by = request.query_params.get("by")
-    #     print(by)
-    #     queryset = queryset.aggregate(Count("account__account_id"))
-    #     # page = self.paginate_queryset(queryset)
-    #     # if page is not None:
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer)
+    @action(detail=False)
+    def sum(self, request):
+        filter_queryset = self.filter_queryset(self.get_queryset())
+        queryset = (
+            filter_queryset.annotate(
+                month=ExtractMonth("value_date"),
+                year=ExtractYear("value_date"),
+                is_income=Case(
+                    When(amount__gt=0, then=Value(True)),
+                    default=Value(False),
+                ),
+            )
+            .values(
+                "month",
+                "year",
+                "account__agreements__category__custom_name",
+                "is_income",
+            )
+            .annotate(
+                sum_amount=Sum("amount"),
+            )
+            .order_by("account__agreements__category__custom_name", "year", "month")
+        )
+
+        serializer = TransationsAggregaredSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class AccountViewSet(viewsets.ModelViewSet):

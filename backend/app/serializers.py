@@ -69,6 +69,17 @@ class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
         fields = "__all__"
 
 
+class TransationsAggregaredSerializer(serializers.ModelSerializer):
+    sum_amount = serializers.FloatField()
+    month = serializers.IntegerField()
+    year = serializers.IntegerField()
+    is_income = serializers.BooleanField()
+
+    class Meta:
+        model = Transactions
+        fields = ("month", "year", "sum_amount", "is_income")
+
+
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
     #    url = serializers.SerializerMethodField('get_employee_detail_url')
 

@@ -9,13 +9,17 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "./ui/button"
-import { RefreshCcw } from "lucide-react"
-import { ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts"
+import { FilterIcon, RefreshCcw } from "lucide-react"
+import { ResponsiveContainer, Tooltip, CartesianGrid, XAxis, YAxis, Bar, BarChart, Line, ComposedChart } from "recharts"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
+import { Checkbox } from "./ui/checkbox"
 
 
 export const ChartInOutcomesCard = () => {
-  const [allTargets, setAllTargets] = useState([])
   const [data, setData] = useState([])
+  const [dateStart, setDateStart] = useState(new Date(new Date().getFullYear(), 0, 1))
+  const [dateEnd, setDateEnd] = useState(new Date(new Date().getFullYear(), 11, 31))
+  const [allTargets, setAllTargets] = useState([])
 
   const initTarget = () => {
     return axiosSesion
@@ -29,48 +33,31 @@ export const ChartInOutcomesCard = () => {
     if (allTargets.length === 0) {
       return;
     }
-
-    const currentYear = new Date().getFullYear();
-
-    // First day of the year
-    const firstDayOfYear = new Date(currentYear, 0, 1);
-
-    // Last day of the year
-    const lastDayOfYear = new Date(currentYear, 11, 31);
+    const targetsString = allTargets.filter((val) => val.is_checked).map((val) => val.name).join(',');
 
     try {
-      const initialResponse = await axiosSesion.get(`http://127.0.0.1:8000/transactions/?value_date_after=${format(firstDayOfYear, 'yyyy-MM-dd')}&value_date_before=${format(lastDayOfYear, 'yyyy-MM-dd')}`);
-      const pageCount = Math.ceil(initialResponse.data.count / 10);
+      const response = await axiosSesion.get(`http://127.0.0.1:8000/transactions/sum/?value_date_after=${format(dateStart, 'yyyy-MM-dd')}&value_date_before=${format(dateEnd, 'yyyy-MM-dd')}&category=${targetsString}`);
+      const aggregatedData = response.data;
 
-      const requests = Array.from({ length: pageCount }, (_, index) =>
-        axiosSesion.get(`http://127.0.0.1:8000/transactions/?value_date_year=2023&page=${index + 1}`)
-      );
-
-      const responses = await Promise.all(requests);
-      const allTransactions = responses.reduce((acc, res) => {
-        acc.push(...res.data.results);
-        return acc;
-      }, []);
-
-      console.warn(allTransactions);
-      const transformedArray = allTransactions.reduce((acc, entry) => {
-        const month = new Date(entry.value_date).getMonth();
-        const amount = parseFloat(entry.amount) || 0; // Parse amount as a float or default to 0
-        const category = entry.account.agreements.category.custom_name;
+      const transformedArray = aggregatedData.reduce((acc, res) => {
+        const month = res.month;
+        const amount = parseFloat(res.sum_amount) || 0;
 
         const existingMonth = acc.find(item => item.month === month);
 
         if (!existingMonth) {
           acc.push({
             month,
-            [`${category}_expenses`]: amount < 0 ? amount : 0,
-            [`${category}_incomes`]: amount >= 0 ? amount : 0,
+            [`expenses`]: amount < 0 ? Math.abs(amount) : 0,
+            [`incomes`]: amount >= 0 ? amount : 0,
+            [`net`]: amount,
           });
         } else {
+          existingMonth[`net`] = (existingMonth[`net`] || 0) + amount;
           if (amount < 0) {
-            existingMonth[`${category}_expenses`] = (existingMonth[`${category}_expenses`] || 0) + amount;
+            existingMonth[`expenses`] = (existingMonth[`expenses`] || 0) + Math.abs(amount);
           } else {
-            existingMonth[`${category}_incomes`] = (existingMonth[`${category}_incomes`] || 0) + amount;
+            existingMonth[`incomes`] = (existingMonth[`incomes`] || 0) + amount;
           }
         }
 
@@ -105,14 +92,29 @@ export const ChartInOutcomesCard = () => {
             <CardDescription className="text-sm text-muted-foreground">Sum of all transaction for given account</CardDescription>
           </div>
           <div className="flex flex-row space-x-1">
-            <Button disabled={!data.length} variant="outline" className="p-1 w-10 h-10"><RefreshCcw /></Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="p-1 w-10 h-10">< FilterIcon /></Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                {allTargets.map((val) => (
+                  <div key={val.name} className="flex flex-row w-full items-center space-x-2 font-semibold">
+                    <Checkbox id={val.name} checked={val.is_checked} onCheckedChange={(checked) => {
+                      return setAllTargets(allTargets.map((el) => (el.name === val.name ? { name: el.name, is_checked: checked } : el)))
+                    }} />
+                    <label id={val.name} htmlFor={val.name}>{val.name}</label>
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
+            {/* <Button disabled={!data.length} onClick={getBalances} variant="outline" className="p-1 w-10 h-10"><RefreshCcw /></Button> */}
           </div>
         </CardHeader>
         <CardContent>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data.reverse()}
+              <ComposedChart
+                data={data}
                 stackOffset="sign"
                 margin={{
                   top: 5,
@@ -121,21 +123,21 @@ export const ChartInOutcomesCard = () => {
                   bottom: 20,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="10 10" opacity={0.4} />
 
                 <XAxis dataKey="month" opacity={0} tick={({ payload, x, y, index }) => (
                   <text x={x} y={y - 10} dy={16} fill="#666" textAnchor="middle">
                     {payload.value}
                   </text>
                 )} />
-                <YAxis />
+                <YAxis interval={'preserveEnd'} tickCount={20} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
                         <div className="rounded-lg border bg-background p-2 shadow-sm">
-                          <div className="grid grid-cols-2 gap-2">
-                            {allTargets.concat(allTargets).map((el, idx) => (
+                          <div className="grid grid-cols-3 gap-2">
+                            {[1, 2, 3].map((el, idx) => (
                               <div key={idx} className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground">
                                   {payload[idx].dataKey}
@@ -154,18 +156,25 @@ export const ChartInOutcomesCard = () => {
                     return null;
                   }}
                 />
-                {allTargets.map((target, idx) => ['incomes', 'expenses'].map((val, idx) => {
+                {['incomes', 'expenses'].map((val, idx) => {
                   return (
                     <Bar
-                      key={`${target.name}_${val}`}
-                      dataKey={`${target.name}_${val}`}
-                      stackId={`${target.name}`}
-                      fill={val === 'expenses' ? 'hsl(var(--primary))' : 'hsl(var(--accent))'}
+                      key={`${val}`}
+                      dataKey={`${val}`}
+                      fill={val === 'expenses' ? 'var(--negative)' : 'var(--positive)'}
                     />
                   )
-                }))}
+                })}
 
-              </BarChart>
+                <Line
+                  key={`net`}
+                  dataKey={`net`}
+                  fill={'hsl(var(--primary))'}
+                  stroke={'hsl(var(--primary))'}
+                  type="monotone"
+                  strokeWidth={2}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
