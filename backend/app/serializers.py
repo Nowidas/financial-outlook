@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 
-from app.models import Account, Agreements, Category, Transactions, Task
+from app.models import Account, Agreements, Category, Transactions, Task, Type, TypeRule
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -78,6 +78,18 @@ class TransationsAggregaredSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transactions
         fields = ("month", "year", "sum_amount", "is_income")
+
+
+class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = TypeRule
+        fields = "__all__"
+
+
+class TypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Type
+        fields = "__all__"
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):

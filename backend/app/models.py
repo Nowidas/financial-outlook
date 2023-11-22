@@ -37,6 +37,27 @@ class Agreements(models.Model):
         return f"{self.institution_id}:{self.agreement_id}"
 
 
+class Type(models.Model):
+    type = models.CharField(max_length=200, unique=True)
+
+    def __str__(self):
+        return str(self.type)
+
+
+class TypeRule(models.Model):
+    type = models.ForeignKey(
+        Type,
+        default=None,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    rule = models.CharField(max_length=200, unique=True)  #! Try django-regex field
+
+    def __str__(self):
+        return str(self.rule)
+
+
 class Transactions(models.Model):
     transaction_id = models.CharField(
         max_length=200, unique=True
@@ -51,6 +72,13 @@ class Transactions(models.Model):
     creditor_name = models.CharField(max_length=200, null=True, blank=True)
     creditor_account = models.CharField(max_length=200, null=True, blank=True)
     currency = models.CharField(max_length=50)
+    type = models.ForeignKey(
+        Type,
+        default=None,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
 
     def __str__(self) -> str:
         return (

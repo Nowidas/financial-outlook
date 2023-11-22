@@ -29,6 +29,8 @@ router.register(r"category", views.CategoryViewSet)
 router.register(r"transactions", views.TransactionViewSet)
 router.register(r"account", views.AccountViewSet)
 router.register(r"tasks", views.TaskViewSet)
+router.register(r"type", views.TypeViewSet)
+router.register(r"typerule", views.TypeRuleViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -40,7 +42,6 @@ urlpatterns = [
         "gocardless/token", views.GetGoCardlessToken.as_view(), name="gocardless_token"
     ),
     path("logout/", views.LogoutView.as_view(), name="logout"),
-    path('task/start/', views.TaskControl.as_view()),
+    path("task/start/", views.TaskControl.as_view()),
     path("admin/", admin.site.urls),
-
 ]

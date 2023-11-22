@@ -32,8 +32,18 @@ from app.serializers import (
     TransactionsSerializer,
     TransationsAggregaredSerializer,
     TaskSerializer,
+    TypeRuleSerializer,
+    TypeSerializer,
 )
-from app.models import Account, Agreements, Category, Transactions, Task
+from app.models import (
+    Account,
+    Agreements,
+    Category,
+    Transactions,
+    Task,
+    Type,
+    TypeRule,
+)
 from app.tasks import fetch_transactions_data
 
 
@@ -167,6 +177,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         serializer = TransationsAggregaredSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class TypeRuleViewSet(viewsets.ModelViewSet):
+    queryset = TypeRule.objects.all()
+    serializer_class = TypeRuleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = Type.objects.all()
+    serializer_class = TypeSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class AccountViewSet(viewsets.ModelViewSet):
