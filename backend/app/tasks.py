@@ -25,7 +25,7 @@ def add(self):
 def task_pool(self, agreement_id, access_token):
     # time.sleep(5)
     # print("Waited 5s")
-    # return True
+    return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
@@ -134,8 +134,8 @@ def task_pool(self, agreement_id, access_token):
 
 
 @shared_task(bind=True)
-def finish_pool(self, pass_val):
-    # Step 7: Update type for new transactions
+def type_assigning(self, pass_val):
+    # Step 6: Update type for new transactions
     new_rules = TypeRule.objects.all().filter(new_flag=True)
     if new_rules:
         new_transactions = Transactions.objects.all().filter(type_manual__isnull=True)
@@ -187,7 +187,10 @@ def finish_pool(self, pass_val):
 
     Transactions.objects.bulk_update(update_list, ["type"])
 
-    # Step 6: Closing task
+
+@shared_task(bind=True)
+def finish_pool(self, pass_val):
+    # Step 7: Closing task
     task = Task.objects.all().filter(status="Working").first()
     if pass_val:
         task.status = "Done"
@@ -239,6 +242,7 @@ def fetch_transactions_data(self):
             task_pool.s(query_element.agreement_id, YOUR_ACCESS_TOKEN)
             for query_element in query
         ],
+        type_assigning.s(),
         finish_pool.s(),
     )
     res = run_chord()

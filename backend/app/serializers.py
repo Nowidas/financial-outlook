@@ -74,6 +74,20 @@ class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
         model = TypeRule
         fields = "__all__"
 
+    def create(self, validated_data):
+        # Extract the data for the related model
+        related_model_data = validated_data.pop("type", None)
+
+        # Create the related model
+        related_model_instance = Type.objects.create(**related_model_data)
+
+        # Create the main model with the related model set
+        your_model_instance = TypeRule.objects.create(
+            type=related_model_instance, **validated_data
+        )
+
+        return your_model_instance
+
 
 class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
     account = AccountSerializer()

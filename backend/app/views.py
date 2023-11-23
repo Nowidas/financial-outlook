@@ -44,7 +44,7 @@ from app.models import (
     Type,
     TypeRule,
 )
-from app.tasks import fetch_transactions_data
+from app.tasks import fetch_transactions_data, type_assigning
 
 
 class LogoutView(views.APIView):
@@ -183,6 +183,24 @@ class TypeRuleViewSet(viewsets.ModelViewSet):
     queryset = TypeRule.objects.all()
     serializer_class = TypeRuleSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        # Your custom logic for create
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            # Perform any custom actions before saving
+            # For example, you can modify the data or perform additional validation
+            # ...
+
+            # Save the object
+            self.perform_create(serializer)
+            type_assigning.delay("nic")
+            # Your custom response data
+            response_data = {"message": "Object created successfully"}
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TypeViewSet(viewsets.ModelViewSet):

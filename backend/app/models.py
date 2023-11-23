@@ -5,6 +5,8 @@ from django_regex.fields import RegexField
 
 from django.db import models
 
+from celery.execute import send_task
+
 
 # Create your models here.
 class Category(models.Model):
@@ -62,6 +64,10 @@ class TypeRule(models.Model):
 
     def __str__(self):
         return str(self.rule)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+        # send_task("tasks.type_assigning")
 
 
 class Transactions(models.Model):
