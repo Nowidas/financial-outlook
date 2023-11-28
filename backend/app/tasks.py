@@ -10,7 +10,7 @@ import requests
 
 import pandas as pd
 
-from celery import shared_task, group, chord
+from celery import chain, shared_task, group
 
 from app.models import Agreements, Task, Transactions, Account, Type, TypeRule
 
@@ -25,7 +25,7 @@ def add(self):
 def task_pool(self, agreement_id, access_token):
     # time.sleep(5)
     # print("Waited 5s")
-    return True
+    # return True
     agreement_element = Agreements.objects.filter(agreement_id=agreement_id).first()
     print(
         f"Starting task for {agreement_element.institution_id}:{agreement_element.agreement_id}"
@@ -137,6 +137,7 @@ def task_pool(self, agreement_id, access_token):
 def type_assigning(self, pass_val):
     # Step 6: Update type for new transactions
     new_rules = TypeRule.objects.all().filter(new_flag=True)
+    print(new_rules)
     if new_rules:
         new_transactions = Transactions.objects.all().filter(type_manual__isnull=True)
         new_rules.update(new_flag=False)
@@ -149,7 +150,9 @@ def type_assigning(self, pass_val):
         "[TYPE_RULE_CHECK] : Transactions to edit",
         len(new_transactions),
         "Rules to check",
-        len(new_rules),
+        len(all_rules),
+        "Is checking all rules: ",
+        bool(new_rules),
     )
     update_list = []
 
@@ -204,7 +207,7 @@ def finish_pool(self, pass_val):
 
 
 @shared_task(bind=True)
-def fetch_transactions_data(self):
+def fetch_transactions_data(self, pass_val={}):
     # run task if not running and log everything to db
     task = Task.objects.all().filter(status="Working").first()
     if task:
@@ -237,15 +240,18 @@ def fetch_transactions_data(self):
 
     # Step 2: get agreements ids and create task pool
     query = Agreements.objects.all()
-    run_chord = chord(
-        [
-            task_pool.s(query_element.agreement_id, YOUR_ACCESS_TOKEN)
-            for query_element in query
-        ],
-        type_assigning.s(),
-        finish_pool.s(),
+    run_chain = chain(
+        group(
+            [
+                task_pool.s(query_element.agreement_id, YOUR_ACCESS_TOKEN)
+                for query_element in query
+            ]
+        ),
+        type_assigning.si(""),
+        finish_pool.si(True),
     )
-    res = run_chord()
+
+    res = run_chain.apply_async()
     return True
 
 

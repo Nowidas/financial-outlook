@@ -187,14 +187,11 @@ class TypeRuleViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Your custom logic for create
         serializer = self.get_serializer(data=request.data)
+        print(serializer)
         if serializer.is_valid():
-            # Perform any custom actions before saving
-            # For example, you can modify the data or perform additional validation
-            # ...
-
             # Save the object
             self.perform_create(serializer)
-            type_assigning.delay("nic")
+            type_assigning.si(True).apply_async()
             # Your custom response data
             response_data = {"message": "Object created successfully"}
 

@@ -65,6 +65,11 @@ class TypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Type
         fields = "__all__"
+        extra_kwargs = {
+            "type": {
+                "validators": [],
+            }
+        }
 
 
 class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
@@ -75,18 +80,24 @@ class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        # Extract the data for the related model
-        related_model_data = validated_data.pop("type", None)
+        # Extract type data
+        type_data = validated_data.pop("type", None)
 
-        # Create the related model
-        related_model_instance = Type.objects.create(**related_model_data)
+        # Attempt to get an existing Type instance
+        existing_type = Type.objects.filter(**type_data).first()
 
-        # Create the main model with the related model set
-        your_model_instance = TypeRule.objects.create(
-            type=related_model_instance, **validated_data
-        )
+        if existing_type:
+            # If Type already exists, use the existing type
+            validated_data["type"] = existing_type
+        else:
+            # If Type doesn't exist, create a new instance
+            new_type = Type.objects.create(**type_data)
+            validated_data["type"] = new_type
 
-        return your_model_instance
+        # Create TypeRule instance with the related Type
+        type_rule_instance = TypeRule.objects.create(**validated_data)
+
+        return type_rule_instance
 
 
 class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
