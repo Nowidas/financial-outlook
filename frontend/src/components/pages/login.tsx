@@ -53,6 +53,8 @@ export const Login: React.FC<IProps> = ({ msg }) => {
     return (
         <Layout>
             <div className="outline outline-offset-4 outline-inherit rounded-sm p-6">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-semibold">Sign in</h1></div>
                 <div className="space-y-4 py-2 pb-4 w-96">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
