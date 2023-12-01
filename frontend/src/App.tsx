@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
-import { HomePage, DashboardPage, Login, Logout } from "@/components/pages";
+import { CategoryPage, DashboardPage, Login, Logout } from "@/components/pages";
 import { MainMenuGlobalComponent } from "@/components/global/MainMenuGlobalComponent";
 import { BrowserRouter as Router, Routes, Route }
   from 'react-router-dom';
@@ -27,6 +27,7 @@ function App() {
             <Router>
               <Routes>
                 <Route path='/' element={<DashboardPage msg="DashboardPage" />} />
+                <Route path='/category' element={<CategoryPage msg="DashboardPage - categories" />} />
                 <Route path='/login' element={<Login msg="LoginPage" />} />
                 <Route path='/logout' element={<Logout />} />
               </Routes>

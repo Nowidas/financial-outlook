@@ -62,6 +62,31 @@ class AccountSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TypeSerializer(serializers.HyperlinkedModelSerializer):
+    rules = serializers.SerializerMethodField("get_member_purchases")
+
+    def get_member_purchases(self, instance):
+        mem_purchases = instance.typerule_set.all()
+        purchases = []
+        for pur in mem_purchases:
+            serializer = TypeRuleSerializer(
+                pur, context={"request": self.context.get("request")}
+            )
+            purchases.append(
+                {
+                    "url": serializer.data["url"],
+                    "rule": pur.rule.pattern,
+                    "importance": pur.importance,
+                    "new_flag": pur.new_flag,
+                }
+            )
+        return purchases
+
+    class Meta:
+        model = Type
+        fields = "__all__"
+
+
+class TypeRuleTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Type
         fields = "__all__"
@@ -73,7 +98,7 @@ class TypeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
-    type = TypeSerializer()
+    type = TypeRuleTypeSerializer()
 
     class Meta:
         model = TypeRule

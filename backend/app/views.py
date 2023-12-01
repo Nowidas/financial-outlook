@@ -187,7 +187,6 @@ class TypeRuleViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Your custom logic for create
         serializer = self.get_serializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             # Save the object
             self.perform_create(serializer)
@@ -235,7 +234,6 @@ class TaskControl(views.APIView):
 
     def post(self, request, format=None):
         if_task_created = fetch_transactions_data.apply_async()
-        print(if_task_created)
         if if_task_created:
             return Response(status=status.HTTP_200_OK)
 

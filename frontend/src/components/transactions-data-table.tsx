@@ -43,7 +43,8 @@ export function DataTable({
           "amount": data.amount,
           "description": data.description,
           "value_date": data.value_date,
-          "category": data.account.agreements.category.custom_name
+          "category": data.account.agreements.category.custom_name,
+          "type": data.type.type
         }
       })
       return {
