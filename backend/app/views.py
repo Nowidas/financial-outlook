@@ -198,6 +198,27 @@ class TypeRuleViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # def destroy(self, request, *args, **kwargs):
+    #     # Your custom logic for delete
+    #     print(request.data)
+    #     serializer = self.get_serializer(data=request.data)
+    #     print(serializer.is_valid())
+    #     if serializer.is_valid():
+    #         # Save the object
+    #         self.perform_destroy(serializer)
+    #         type_assigning.si(True).apply_async()
+    #         # Your custom response data
+    #         response_data = {"message": "Object deleted successfully"}
+
+    #         return Response(response_data, status=status.HTTP_204_NO_CONTENT)
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        Transactions.objects.filter(type=instance.type).update(type=None)
+        type_assigning.si(True).apply_async()
+
 
 class TypeViewSet(viewsets.ModelViewSet):
     queryset = Type.objects.all()

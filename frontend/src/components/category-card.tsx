@@ -13,23 +13,35 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { PaginationState } from "@tanstack/react-table"
 import toast from "react-hot-toast"
 import axiosSesion from "./helpers/sesioninterceptor"
-import { ChevronsUpDown, CuboidIcon, EditIcon, PlusSquareIcon } from "lucide-react"
+import { ChevronsUpDown, CuboidIcon, EditIcon, Pencil, PlusIcon, PlusSquareIcon, Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
+import { useTypeModal } from "./hooks/use-type-modal"
+import { useTypeRuleModal } from "./hooks/use-typerule-modal"
 
 export const CategoryCard = () => {
-  const [isOpen, setIsOpen] = useState(false)
+  const onOpenType = useTypeModal((state) => state.onOpen);
+  const onOpenTypeRule = useTypeRuleModal((state) => state.onOpen);
 
   async function fetchTypes(page = 0) {
     // Fetch data from your API here.
-    console.warn("fetching types")
     try {
       const res = await axiosSesion.get('http://127.0.0.1:8000/type/?page=' + (page + 1))
       const data = res.data.results
       const count = res.data.count
-      console.warn(data)
       const formatted_result = data.map((data) => {
         return {
           "id": data.url,
@@ -72,6 +84,30 @@ export const CategoryCard = () => {
     placeholderData: keepPreviousData
   })
 
+  const typeDelete = async (urlId: string) => {
+    try {
+      const resp = await axiosSesion.delete(urlId)
+      toast.success("Category deleted.");
+    } catch (err) {
+      toast.error("Something went wrong");
+    } finally {
+      dataQuery.refetch()
+    }
+
+  }
+
+  const typeruleDelete = async (urlId: string) => {
+    try {
+      const resp = await axiosSesion.delete(urlId)
+      toast.success("Category deleted.");
+    } catch (err) {
+      toast.error("Something went wrong");
+    } finally {
+      dataQuery.refetch()
+    }
+
+  }
+
   if (dataQuery.isLoading) {
     return <span>Loading...</span>
   }
@@ -79,7 +115,7 @@ export const CategoryCard = () => {
   if (dataQuery.isError) {
     return <span>Error</span>
   }
-  console.warn(dataQuery.data)
+  // console.warn(dataQuery.data)
   return (
     <>
       <Card className="w-[1000px]">
@@ -88,7 +124,7 @@ export const CategoryCard = () => {
             <CardTitle className="text-3xl font-bold tracking-tight">Types and rules</CardTitle>
             <CardDescription className="text-sm text-muted-foreground">Manage category types for each transactions and rules to assign them</CardDescription>
           </div>
-          <Button disabled={false} onClick={() => console.log('click')} variant="ghost" className="p-1 w-10 h-10"><PlusSquareIcon /></Button>
+          <Button disabled={false} onClick={() => onOpenType("")} variant="ghost" className="p-1 w-10 h-10"><PlusSquareIcon /></Button>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-2 m-4">
@@ -96,40 +132,110 @@ export const CategoryCard = () => {
               <Alert key={type.id}>
                 <CuboidIcon className="h-4 w-4" />
                 <AlertTitle>{type.type}</AlertTitle>
-                <AlertDescription>
+                <AlertDescription className="flex flex-row w-full">
                   <Collapsible
-
-                    className="w-[350px] space-y-2"
+                    className="w-[550px] space-y-2"
                   >
                     <div className="flex items-center justify-between space-x-4 ">
                       <h4 className={"text-sm font-semibold " + (!type.rules.length ? 'text-muted-foreground' : '')}>
                         {type.rules.length} rules to show.
                       </h4>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="w-9 p-0" disabled={!type.rules.length}>
-                          <ChevronsUpDown className="h-4 w-4" />
-                          <span className="sr-only">Toggle</span>
-                        </Button>
-                      </CollapsibleTrigger>
+                      {type.rules.length ?
+                        (
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="w-9 p-0" >
+                              <ChevronsUpDown className="h-4 w-4" />
+                              <span className="sr-only">Toggle</span>
+                            </Button>
+                          </CollapsibleTrigger>
+                        ) : (
+                          <Button variant="ghost" size="sm" className="w-9 p-0" onClick={() => onOpenTypeRule(type.type)}>
+                            <PlusIcon className="h-4 w-4" />
+                            <span className="sr-only">Add new rule</span>
+                          </Button>
+                        )
+                      }
                     </div>
-                    {/* <div className="rounded-md border px-4 py-3 font-mono text-sm">
-                      @radix-ui/primitives
-                    </div> */}
                     <CollapsibleContent className="space-y-2">
                       {type.rules.map((rule) => (
                         <div key={rule.url} className="flex items-center justify-between space-x-4 rounded-md border px-3 py-1 font-mono text-sm">
                           <h4 className="text-sm font-normal">
                             {rule.rule}
                           </h4>
-                          <Button variant="ghost" size="sm" className="w-9 p-0">
-                            <EditIcon className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="w-9 p-0" >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                              {/* <Button disabled={false} variant="ghost" className="p-1 w-9 h-9"><Trash2 /></Button> */}
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction asChild>
+                                  <Button variant='destructive' onClick={() => typeruleDelete(rule.url)}> Delete </Button>
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
                         </div>
                       ))}
-
+                      <Button variant="outline" className="w-full flex items-center justify-start space-x-2 rounded-md border px-3 py-1 font-mono text-sm" onClick={() => onOpenTypeRule(type.type)}>
+                        <h4 className="text-sm font-normal cursor-pointer">
+                          New rule
+                        </h4>
+                        <PlusIcon className="h-4 w-4" />
+                      </Button>
                     </CollapsibleContent>
+
                   </Collapsible>
+                  <div className="flex flex-row space-x-2 w-full justify-end">
+                    <Button disabled={false} onClick={() => onOpenType(type.id)} variant="ghost" className="p-1 w-9 h-9"><Pencil /></Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button disabled={false} variant="ghost" className="p-1 w-9 h-9"><Trash2 /></Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction asChild>
+                            <Button variant='destructive' onClick={() => typeDelete(type.id)}> Delete </Button>
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    {/* <AlertDialog >
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" className="p-1 w-9 h-9" > <Trash2 /> </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel >Cancel</AlertDialogCancel>
+                          <Button className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => typeDelete(type.id)}>Delete</Button>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog> */}
+                  </div>
+
                 </AlertDescription>
               </Alert>
             ))}
@@ -137,7 +243,7 @@ export const CategoryCard = () => {
 
         </CardContent>
 
-      </Card>
+      </Card >
     </>
   )
 }

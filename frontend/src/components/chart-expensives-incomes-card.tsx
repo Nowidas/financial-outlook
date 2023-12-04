@@ -65,7 +65,7 @@ export const ChartInOutcomesCard = () => {
       }, []);
 
       // Process or use allTransactions here
-      console.warn(transformedArray);
+      // console.warn(transformedArray);
       setData(transformedArray);
     } catch (error) {
       // Handle errors
