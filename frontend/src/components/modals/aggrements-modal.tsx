@@ -153,7 +153,7 @@ export const AgreementsModal = () => {
             const data = response.data
             console.log(JSON.stringify(response.data));
             const expires_at = new Date(data.created)
-            expires_at.setDate(expires_at.getDate() + parseInt(val.transaction_total_days));
+            expires_at.setDate(expires_at.getDate() + parseInt('90'));
             const responseData = {
               "agreement_id": data.id,
               "created_at": data.created,
