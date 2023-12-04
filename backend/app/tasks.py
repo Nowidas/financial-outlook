@@ -136,7 +136,7 @@ def task_pool(self, agreement_id, access_token):
 @shared_task(bind=True)
 def type_assigning(self, pass_val):
     # Step 6: Update type for new transactions
-    new_rules = TypeRule.objects.all().filter(new_flag=True)
+    new_rules = TypeRule.objects.all().filter(new_flag=True, type__isnull=False)
     print(new_rules)
     if new_rules:
         new_transactions = Transactions.objects.all().filter(type_manual__isnull=True)
@@ -145,7 +145,7 @@ def type_assigning(self, pass_val):
         new_transactions = Transactions.objects.all().filter(
             type=None, type_manual__isnull=True
         )
-    all_rules = TypeRule.objects.all().order_by("importance")
+    all_rules = TypeRule.objects.all().filter(type__isnull=False).order_by("importance")
     print(
         "[TYPE_RULE_CHECK] : Transactions to edit",
         len(new_transactions),
