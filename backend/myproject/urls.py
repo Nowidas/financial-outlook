@@ -43,5 +43,6 @@ urlpatterns = [
     ),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("task/start/", views.TaskControl.as_view()),
+    path("claudinary/", views.CloudinaryApiWiew.as_view()),
     path("admin/", admin.site.urls),
 ]

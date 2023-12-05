@@ -1,15 +1,21 @@
 import { create } from "zustand";
 
+interface typeInterface {
+    id: string;
+    type: string;
+    icon_url: string;
+}
+
 interface useTypeModalInterface {
-    typeId: string;
+    typeId: typeInterface;
     isOpen: boolean;
-    onOpen: (typeId: string) => void;
+    onOpen: (typeId: typeInterface) => void;
     onClose: () => void;
 };
 
 export const useTypeModal = create<useTypeModalInterface>((set) => ({
-    typeId: '',
+    typeId: { id: '', type: '', icon_url: '' },
     isOpen: false,
-    onOpen: (typeId) => set({ typeId: typeId, isOpen: true }),
-    onClose: () => set({ isOpen: false, typeId: '' }),
+    onOpen: (typeId) => set({ typeId: { id: typeId.id, type: typeId.type, icon_url: typeId.icon_url }, isOpen: true }),
+    onClose: () => set({ isOpen: false, typeId: { id: '', type: '', icon_url: '' } }),
 }))

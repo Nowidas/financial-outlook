@@ -27,10 +27,12 @@ import {
 import { PaginationState } from "@tanstack/react-table"
 import toast from "react-hot-toast"
 import axiosSesion from "./helpers/sesioninterceptor"
-import { ChevronsUpDown, CuboidIcon, EditIcon, Pencil, PlusIcon, PlusSquareIcon, Trash2 } from "lucide-react"
+import { AppleIcon, ChevronsUpDown, CuboidIcon, EditIcon, Pencil, PlusIcon, PlusSquareIcon, Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
 import { useTypeModal } from "./hooks/use-type-modal"
 import { useTypeRuleModal } from "./hooks/use-typerule-modal"
+
+import SVG from 'react-inlinesvg';
 
 export const CategoryCard = () => {
   const onOpenType = useTypeModal((state) => state.onOpen);
@@ -46,6 +48,7 @@ export const CategoryCard = () => {
         return {
           "id": data.url,
           "type": data.type,
+          "icon_url": data.icon_url,
           "rules": data.rules
         }
       })
@@ -124,13 +127,32 @@ export const CategoryCard = () => {
             <CardTitle className="text-3xl font-bold tracking-tight">Types and rules</CardTitle>
             <CardDescription className="text-sm text-muted-foreground">Manage category types for each transactions and rules to assign them</CardDescription>
           </div>
-          <Button disabled={false} onClick={() => onOpenType("")} variant="ghost" className="p-1 w-10 h-10"><PlusSquareIcon /></Button>
+          <Button disabled={false} onClick={() => onOpenType({})} variant="ghost" className="p-1 w-10 h-10"><PlusSquareIcon /></Button>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-2 m-4">
             {dataQuery.data.rows.map((type) => (
               <Alert key={type.id}>
-                <CuboidIcon className="h-4 w-4" />
+                {type.icon_url ? (
+
+                  <SVG
+                    src={type.icon_url}
+                    className="h-4 w-4 p-[2px] bg-gradient-to-r from-cyan-500 to-blue-500	rounded-full"
+                    height={16}
+                    width={16}
+                    title="React"
+                    cacheRequests={true}
+                    preProcessor={(code) => code.replace(/fill=".*?"/g, 'fill="hsl(var(--primary))"')}
+                  />
+                  // <img className="h-4 w-4" src={type.icon_url} />
+                ) : (
+
+                  // <div className="h-4 w-4" >
+                  //   🥞
+                  // </div>
+                  <AppleIcon className="h-4 w-4 p-[2px] bg-gradient-to-r from-cyan-500 to-blue-500	rounded-full" />
+                )}
+
                 <AlertTitle>{type.type}</AlertTitle>
                 <AlertDescription className="flex flex-row w-full">
                   <Collapsible
@@ -198,7 +220,7 @@ export const CategoryCard = () => {
 
                   </Collapsible>
                   <div className="flex flex-row space-x-2 w-full justify-end">
-                    <Button disabled={false} onClick={() => onOpenType(type.id)} variant="ghost" className="p-1 w-9 h-9"><Pencil /></Button>
+                    <Button disabled={false} onClick={() => onOpenType(type)} variant="ghost" className="p-1 w-9 h-9"><Pencil /></Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button disabled={false} variant="ghost" className="p-1 w-9 h-9"><Trash2 /></Button>

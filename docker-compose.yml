@@ -39,6 +39,7 @@ services:
     environment:
       - GOCARDLESS_SECRET_KEY=${GOCARDLESS_SECRET_KEY}
       - GOCARDLESS_SECRET_ID=${GOCARDLESS_SECRET_ID}
+      - CLOUDINARY_URL=${CLOUDINARY_URL}
     command: celery -A myproject worker -l info -B -E
     volumes:
       - ./backend:/backend

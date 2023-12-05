@@ -3,6 +3,10 @@ import datetime
 import json
 from django.forms import MultipleChoiceField
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 from django.contrib.auth.models import User, Group
@@ -297,4 +301,21 @@ class GetGoCardlessToken(views.APIView):
             response["status"] = r.status_code
             response["message"] = "error"
             response["credentials"] = {}
+        return Response(response)
+
+
+class CloudinaryApiWiew(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, format=None):
+        response = {}
+        r = (
+            cloudinary.Search()
+            .expression("folder:category-icons/*")
+            .sort_by("public_id", "desc")
+            .max_results("30")
+            .execute()
+        )
+        response["data"] = [el["url"] for el in r["resources"]]
+        print(r)
         return Response(response)

@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ModalProvider } from './components/providers/modal-provider';
 import { ToasterProvider } from './components/providers/toast-provider';
 import { ThemeProvider } from './components/theme-provider';
+import CacheProvider from 'react-inlinesvg/provider';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,18 +22,20 @@ function App() {
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <QueryClientProvider client={queryClient}>
-          <div className="flex flex-col  w-full h-full">
-            <ToasterProvider />
-            <ModalProvider />
-            <Router>
-              <Routes>
-                <Route path='/' element={<DashboardPage msg="DashboardPage" />} />
-                <Route path='/category' element={<CategoryPage msg="DashboardPage - categories" />} />
-                <Route path='/login' element={<Login msg="LoginPage" />} />
-                <Route path='/logout' element={<Logout />} />
-              </Routes>
-            </Router>
-          </div>
+          <CacheProvider>
+            <div className="flex flex-col  w-full h-full">
+              <ToasterProvider />
+              <ModalProvider />
+              <Router>
+                <Routes>
+                  <Route path='/' element={<DashboardPage msg="DashboardPage" />} />
+                  <Route path='/category' element={<CategoryPage msg="DashboardPage - categories" />} />
+                  <Route path='/login' element={<Login msg="LoginPage" />} />
+                  <Route path='/logout' element={<Logout />} />
+                </Routes>
+              </Router>
+            </div>
+          </CacheProvider>
         </QueryClientProvider>
 
       </ThemeProvider>
