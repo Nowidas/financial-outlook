@@ -23,13 +23,28 @@ import axiosSesion from "@/components/helpers/sesioninterceptor";
 import { useQueryClient } from "@tanstack/react-query";
 
 
-export const TypeModal = (allIcon) => {
+export const TypeModal = () => {
   const TypeModal = useTypeModal();
   const queryClient = useQueryClient()
+  const [allIcon, setAllIcon] = useState([]);
+
+  useEffect(() => {
+    const fetchAllIcon = async () => {
+      try {
+        const response = await axiosSesion.get('http://127.0.0.1:8000/claudinary/');
+        console.log(response);
+        setAllIcon(response.data.data); // Assuming the icons are available in the response data
+      } catch (error) {
+        console.error("Error fetching icons", error);
+        setAllIcon([]);
+      }
+    };
+    fetchAllIcon();
+  }, []);
 
   const formSchema = z.object({
     type: z.string().min(1).max(50),
-    icon_url: z.enum(allIcon.allIcon, {
+    icon_url: z.enum(allIcon, {
       required_error: "You need to select a category icon.",
     }),
   })
@@ -84,6 +99,10 @@ export const TypeModal = (allIcon) => {
     TypeModal.onClose();
     form.reset();
   }
+  if (allIcon === undefined) {
+    return <div> Loading... </div>;
+  }
+
   return (
     <Modal
       title={TypeModal.typeId.id ? `Edit a ${TypeModal.typeId.type} category` : "Create a new category"}
@@ -118,14 +137,33 @@ export const TypeModal = (allIcon) => {
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex flex-col space-y-1"
+                      className="flex flex-row space-y-1"
                     >
-                      {allIcon.allIcon.map((icon) => (
-                        <FormItem key={icon} className="flex items-center space-x-3 space-y-0">
+                      {allIcon.map((icon) => (
+                        <FormItem key={icon} className="flex items-center flex-wrap space-x-3 space-y-0">
                           <FormControl>
-                            <RadioGroupItem value={icon} />
+                            <div
+                              onClick={() => field.onChange(icon)}
+                              className={`cursor-pointer p-1 rounded-full ${field.value === icon
+                                ? "border-2 border-primary"
+                                : ""
+                                }`}
+                            >
+                              <SVG
+                                src={icon}
+                                className="h-4 w-4"
+                                height={16}
+                                width={16}
+                                title="React"
+                                fill="hsl(var(--primary))"
+                                cacheRequests={true}
+                                preProcessor={(code) =>
+                                  code.replace(/fill=".*?"/g, 'fill="hsl(var(--primary))"')
+                                }
+                              />
+                            </div>
                           </FormControl>
-                          <FormLabel className="font-normal">
+                          {/* <FormLabel className="font-normal">
                             <SVG
                               src={icon}
                               className="h-4 w-4 p-[2px] bg-gradient-to-r from-cyan-500 to-blue-500	rounded-full"
@@ -135,7 +173,7 @@ export const TypeModal = (allIcon) => {
                               cacheRequests={true}
                               preProcessor={(code) => code.replace(/fill=".*?"/g, 'fill="hsl(var(--primary))"')}
                             />
-                          </FormLabel>
+                          </FormLabel> */}
                         </FormItem>
                       ))}
                     </RadioGroup>

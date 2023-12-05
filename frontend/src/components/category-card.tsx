@@ -27,7 +27,7 @@ import {
 import { PaginationState } from "@tanstack/react-table"
 import toast from "react-hot-toast"
 import axiosSesion from "./helpers/sesioninterceptor"
-import { AppleIcon, ChevronsUpDown, CuboidIcon, EditIcon, Pencil, PlusIcon, PlusSquareIcon, Trash2 } from "lucide-react"
+import { AppleIcon, BoxIcon, ChevronsUpDown, CuboidIcon, EditIcon, Pencil, PlusIcon, PlusSquareIcon, Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
 import { useTypeModal } from "./hooks/use-type-modal"
 import { useTypeRuleModal } from "./hooks/use-typerule-modal"
@@ -137,7 +137,8 @@ export const CategoryCard = () => {
 
                   <SVG
                     src={type.icon_url}
-                    className="h-4 w-4 p-[2px] bg-gradient-to-r from-cyan-500 to-blue-500	rounded-full"
+                    className="h-4 w-4 p-[2px]"
+                    fill="hsl(var(--primary))"
                     height={16}
                     width={16}
                     title="React"
@@ -150,7 +151,7 @@ export const CategoryCard = () => {
                   // <div className="h-4 w-4" >
                   //   🥞
                   // </div>
-                  <AppleIcon className="h-4 w-4 p-[2px] bg-gradient-to-r from-cyan-500 to-blue-500	rounded-full" />
+                  <BoxIcon className="h-4 w-4 p-[2px] " />
                 )}
 
                 <AlertTitle>{type.type}</AlertTitle>
