@@ -37,6 +37,7 @@ export function DataTable({
       const res = await axiosSesion.get('http://127.0.0.1:8000/transactions/?page=' + (page + 1))
       const data = res.data.results
       const count = res.data.count
+      console.log(res.data.results)
       const formatted_result = data.map((data) => {
         return {
           "id": data.url,
@@ -44,9 +45,11 @@ export function DataTable({
           "description": data.description,
           "value_date": data.value_date,
           "category": data.account.agreements.category.custom_name,
-          "type": data.type.type
+          "type": { type: data.type.type, icon_url: data.type.icon_url },
+          // "type_icon": data.type.icon_url
         }
       })
+      console.warn(formatted_result)
       return {
         'count': count,
         'rows': [...formatted_result]
@@ -129,6 +132,18 @@ export function DataTable({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="h-6">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* <SVG
+                        src="http://res.cloudinary.com/dr8gvbzra/image/upload/v1701804527/category-icons/k9wrcdap5q3scu0iq3ym.svg"
+                        className="h-4 w-4"
+                        height={16}
+                        width={16}
+                        title="React"
+                        fill="hsl(var(--primary))"
+                        cacheRequests={true}
+                        preProcessor={(code) =>
+                          code.replace(/fill=".*?"/g, 'fill="hsl(var(--primary))"')
+                        }
+                      /> */}
                     </TableCell>
                   ))}
                 </TableRow>

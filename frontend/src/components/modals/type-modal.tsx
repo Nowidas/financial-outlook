@@ -32,7 +32,6 @@ export const TypeModal = () => {
     const fetchAllIcon = async () => {
       try {
         const response = await axiosSesion.get('http://127.0.0.1:8000/claudinary/');
-        console.log(response);
         setAllIcon(response.data.data); // Assuming the icons are available in the response data
       } catch (error) {
         console.error("Error fetching icons", error);
