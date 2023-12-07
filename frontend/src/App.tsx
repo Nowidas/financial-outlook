@@ -25,7 +25,6 @@ function App() {
           <CacheProvider>
             <div className="flex flex-col  w-full h-full">
               <ToasterProvider />
-              <ModalProvider />
               <Router>
                 <Routes>
                   <Route path='/' element={<DashboardPage msg="DashboardPage" />} />
