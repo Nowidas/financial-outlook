@@ -317,5 +317,4 @@ class CloudinaryApiWiew(views.APIView):
             .execute()
         )
         response["data"] = [el["url"] for el in r["resources"]]
-        print(r)
         return Response(response)
