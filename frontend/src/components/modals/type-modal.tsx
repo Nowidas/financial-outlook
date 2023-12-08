@@ -60,7 +60,6 @@ export const TypeModal = () => {
     if (!TypeModal.isOpen) {
       return
     }
-    console.warn(TypeModal);
     form.setValue("type", TypeModal.typeId.type ?? "");
     form.setValue("icon_url", TypeModal.typeId.icon_url ?? "");
     form.register("icon_url");

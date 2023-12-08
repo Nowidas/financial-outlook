@@ -128,6 +128,7 @@ class TypeRuleSerializer(serializers.HyperlinkedModelSerializer):
 class TransactionsSerializer(serializers.HyperlinkedModelSerializer):
     account = AccountSerializer()
     type = TypeSerializer()
+    type_manual = TypeSerializer()
 
     class Meta:
         model = Transactions

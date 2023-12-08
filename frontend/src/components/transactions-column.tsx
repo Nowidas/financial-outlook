@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import SVG from 'react-inlinesvg';
 import { Button } from "./ui/button";
-import { BoxIcon, MoreHorizontal, StickyNoteIcon } from "lucide-react";
+import { BotIcon, BoxIcon, MoreHorizontal, StickyNoteIcon } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -18,6 +18,7 @@ import {
 import { Checkbox } from "./ui/checkbox";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosSesion from "./helpers/sesioninterceptor";
+import toast from "react-hot-toast";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Transactions = {
@@ -29,7 +30,11 @@ export type Transactions = {
     type: {
         icon_url: string | undefined;
         type: string;
-    }
+    },
+    type_manual: {
+        icon_url: string | undefined;
+        type: string;
+    } | undefined
 }
 
 export const columns: ColumnDef<Transactions>[] = [
@@ -45,9 +50,11 @@ export const columns: ColumnDef<Transactions>[] = [
         accessorKey: "type",
         header: "Type",
         cell: ({ row }) => {
-            const type = row.getValue("type")
+            const transaction = row.original
+            const type = transaction.type_manual ? transaction.type_manual : transaction.type
+            const manualFlag = transaction.type_manual ? true : false
             return type?.icon_url ? (
-                <div className="flex flex-row space-x-2 items-center">
+                <div className={`flex flex-row space-x-2 items-center ${manualFlag ? 'italic' : ''}`}>
                     <SVG
                         className="h-4 w-4"
                         height={16}
@@ -58,7 +65,7 @@ export const columns: ColumnDef<Transactions>[] = [
                     <span>{type.type}</span>
                 </div>
             ) : (
-                <div className="flex flex-row space-x-2 items-center">
+                <div className={`flex flex-row space-x-2 items-center ${manualFlag ? 'bg-red-700' : ''}`}>
                     <span>{type.type}</span>
                 </div>
             )
@@ -101,14 +108,31 @@ export const columns: ColumnDef<Transactions>[] = [
                     'rows': []
                 }
             }
+            const queryClient = useQueryClient()
+
             const dataQuery = useQuery({
                 queryKey: ['types', 1],
                 queryFn: () => fetchTypes(0),
                 staleTime: 5000,
                 placeholderData: keepPreviousData
             })
+            const putType = async (transaction, type) => {
+                // setDeleteLoading(true);
+                console.warn('[PUT]', transaction.id, { 'type_manual': type.type === transaction.type.type ? null : type.id })
+                axiosSesion
+                    .patch(transaction.id, { 'type_manual': type.type === transaction.type.type ? null : type.id })
+                    .then(() => {
+                        queryClient.invalidateQueries({ queryKey: ['transactions'], type: 'active', })
+                    })
+                    .catch(() => { toast.error("Unable to update"); })
+            }
+            const changeType = async (transaction, type) => {
+                putType(transaction, type)
+            }
 
             const transaction = row.original
+            const transactionType = transaction.type_manual ? transaction.type_manual : transaction.type
+            const manualFlag = transaction.type_manual ? true : false
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -128,10 +152,11 @@ export const columns: ColumnDef<Transactions>[] = [
                                 <DropdownMenuSubContent>
                                     {dataQuery.data?.rows.map((type) =>
                                     (
-                                        <DropdownMenuCheckboxItem checked={transaction.type.type === type.type} key={type.id} onClick={() => console.log(`Clicked category to ${transaction.type.type}`)}>
+                                        <DropdownMenuCheckboxItem checked={transactionType.type === type.type} key={type.id} onClick={() => { changeType(transaction, type) }}>
                                             <label htmlFor={type.id} >
                                                 {type.type}
                                             </label>
+                                            {manualFlag && transaction.type.type === type.type ? (<BotIcon className="ml-1 h-4 w-4" />) : null}
                                         </DropdownMenuCheckboxItem>
                                     )
                                     )}

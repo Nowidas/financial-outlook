@@ -1,6 +1,7 @@
 import os
 import datetime
 import json
+import re
 from django.forms import MultipleChoiceField
 
 import cloudinary
@@ -12,6 +13,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
+from django.urls import resolve
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models.functions import ExtractMonth, ExtractYear
@@ -149,7 +151,7 @@ class TransactionFilter(filters.FilterSet):
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transactions.objects.all()
+    queryset = Transactions.objects.all().order_by("-value_date", "transaction_id")
     serializer_class = TransactionsSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.DjangoFilterBackend]
@@ -181,6 +183,35 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         serializer = TransationsAggregaredSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        print("update", request.data)
+        instance = self.get_object()
+        type_url = request.data.get("type_manual")
+
+        if type_url:
+            # Use a regular expression to extract the ID from the URL
+            match = re.search(r"/type/(?P<type_id>\d+)/$", type_url)
+
+            if match:
+                type_id = match.group("type_id")
+                type_obj = Type.objects.filter(id=type_id).first()
+
+                if type_obj:
+                    instance.type_manual = type_obj
+                else:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={"detail": "Invalid type_manual URL"},
+                )
+        else:
+            # Set type_manual to null (None) if no URL is provided
+            instance.type_manual = None
+
+        instance.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class TypeRuleViewSet(viewsets.ModelViewSet):

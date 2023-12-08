@@ -17,7 +17,7 @@ const useCrud = <T>(initalData: T[], apiURL: string): IuseCrud<T> => {
         try {
             const response = await axiosSesion.get(`http://127.0.0.1:8000/${apiURL}/`, {})
             const data = response.data
-            console.log(data)
+            // console.log(data)
             setDataCRUD(data)
             setError(null)
             setIsLoading(false)

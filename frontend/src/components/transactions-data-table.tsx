@@ -37,7 +37,6 @@ export function DataTable({
       const res = await axiosSesion.get('http://127.0.0.1:8000/transactions/?page=' + (page + 1))
       const data = res.data.results
       const count = res.data.count
-      console.log(res.data.results)
       const formatted_result = data.map((data) => {
         return {
           "id": data.url,
@@ -46,16 +45,17 @@ export function DataTable({
           "value_date": data.value_date,
           "category": data.account.agreements.category.custom_name,
           "type": { type: data.type.type, icon_url: data.type.icon_url },
+          "type_manual": data.type_manual !== null ? { type: data.type_manual.type, icon_url: data.type_manual.icon_url } : undefined,
           // "type_icon": data.type.icon_url
         }
       })
-      console.warn(formatted_result)
       return {
         'count': count,
         'rows': [...formatted_result]
       }
-    } catch {
-      toast.error("Error fetching transpactions")
+    } catch (err) {
+      toast.error("Error fetching transactions")
+      console.warn("Error fetching transactions", err)
     }
     return {
       'count': 1,
