@@ -85,6 +85,7 @@ class Transactions(models.Model):
     creditor_name = models.CharField(max_length=200, null=True, blank=True)
     creditor_account = models.CharField(max_length=200, null=True, blank=True)
     currency = models.CharField(max_length=50)
+    note = models.CharField(max_length=500, null=True, blank=True)
     type = models.ForeignKey(
         Type,
         default=None,

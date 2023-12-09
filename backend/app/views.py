@@ -187,31 +187,36 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         print("update", request.data)
         instance = self.get_object()
-        type_url = request.data.get("type_manual")
 
-        if type_url:
-            # Use a regular expression to extract the ID from the URL
-            match = re.search(r"/type/(?P<type_id>\d+)/$", type_url)
+        if "type_manual" in request.data.keys():
+            type_url = request.data.pop("type_manual")
 
-            if match:
-                type_id = match.group("type_id")
-                type_obj = Type.objects.filter(id=type_id).first()
+            if type_url:
+                # Use a regular expression to extract the ID from the URL
+                match = re.search(r"/type/(?P<type_id>\d+)/$", type_url)
 
-                if type_obj:
-                    instance.type_manual = type_obj
+                if match:
+                    type_id = match.group("type_id")
+                    type_obj = Type.objects.filter(id=type_id).first()
+
+                    if type_obj:
+                        instance.type_manual = type_obj
+                        instance.save()
+
+                    else:
+                        return Response(status=status.HTTP_404_NOT_FOUND)
                 else:
-                    return Response(status=status.HTTP_404_NOT_FOUND)
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={"detail": "Invalid type_manual URL"},
+                    )
             else:
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    data={"detail": "Invalid type_manual URL"},
-                )
-        else:
-            # Set type_manual to null (None) if no URL is provided
-            instance.type_manual = None
+                instance.type_manual = None
+                instance.save()
 
-        instance.save()
-        return Response(status=status.HTTP_200_OK)
+        # Update rest of fields
+        response = super().update(request, *args, **kwargs)
+        return response
 
 
 class TypeRuleViewSet(viewsets.ModelViewSet):
