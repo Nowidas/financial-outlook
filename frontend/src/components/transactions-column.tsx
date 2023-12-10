@@ -15,10 +15,16 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { Checkbox } from "./ui/checkbox";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosSesion from "./helpers/sesioninterceptor";
 import toast from "react-hot-toast";
+import { useTransactionNote } from "./hooks/use-transation-note-modal";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Transactions = {
@@ -27,6 +33,7 @@ export type Transactions = {
     description: string
     value_date: string
     category: string
+    note: string | null
     type: {
         icon_url: string | undefined;
         type: string;
@@ -74,6 +81,24 @@ export const columns: ColumnDef<Transactions>[] = [
     {
         accessorKey: "description",
         header: "Description",
+        cell: ({ row }) => {
+            const transaction = row.original
+            return (
+                <div className={`flex flex-row space-x-2 items-center`}>
+                    <span>{transaction.description}</span>
+                    {transaction.note ? (
+                        <HoverCard openDelay={100} closeDelay={100}>
+                            <HoverCardTrigger asChild>
+                                <StickyNoteIcon className="ml-2 h-4 w-4" />
+                            </HoverCardTrigger>
+                            <HoverCardContent>
+                                {transaction.note}
+                            </HoverCardContent>
+                        </HoverCard>
+                    ) : null}
+                </div>
+            )
+        }
     },
     {
         accessorKey: "amount",
@@ -109,6 +134,7 @@ export const columns: ColumnDef<Transactions>[] = [
                 }
             }
             const queryClient = useQueryClient()
+            const TransactionNote = useTransactionNote();
 
             const dataQuery = useQuery({
                 queryKey: ['types', 1],
@@ -171,7 +197,7 @@ export const columns: ColumnDef<Transactions>[] = [
                             </label>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { console.log(transaction); TransactionNote.onOpen(transaction) }} >
                             <StickyNoteIcon className="mr-2 h-4 w-4" />
                             <span>Add note</span> </DropdownMenuItem>
                     </DropdownMenuContent>

@@ -46,6 +46,7 @@ export function DataTable({
           "category": data.account.agreements.category.custom_name,
           "type": { type: data.type.type, icon_url: data.type.icon_url },
           "type_manual": data.type_manual !== null ? { type: data.type_manual.type, icon_url: data.type_manual.icon_url } : undefined,
+          "note": data.note,
           // "type_icon": data.type.icon_url
         }
       })
