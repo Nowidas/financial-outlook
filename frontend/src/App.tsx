@@ -12,6 +12,7 @@ import { ModalProvider } from './components/providers/modal-provider';
 import { ToasterProvider } from './components/providers/toast-provider';
 import { ThemeProvider } from './components/theme-provider';
 import CacheProvider from 'react-inlinesvg/provider';
+import { TransactionsConnectionsPage } from './components/pages/TransactionsConnectionsPage';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -27,8 +28,9 @@ function App() {
               <ToasterProvider />
               <Router>
                 <Routes>
-                  <Route path='/' element={<DashboardPage msg="DashboardPage" />} />
-                  <Route path='/category' element={<CategoryPage msg="DashboardPage - categories" />} />
+                  <Route path='/' element={<TransactionsConnectionsPage msg="FinancialOutlook - transactions" />} />
+                  <Route path='/category' element={<CategoryPage msg="FinancialOutlook - categories" />} />
+                  <Route path='/dashboard' element={<DashboardPage msg="FinancialOutlook - report" />} />
                   <Route path='/login' element={<Login msg="LoginPage" />} />
                   <Route path='/logout' element={<Logout />} />
                 </Routes>
