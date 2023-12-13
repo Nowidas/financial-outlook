@@ -31,6 +31,7 @@ from django_filters import rest_framework as filters
 
 from app.serializers import (
     AccountSerializer,
+    CategoryAggregaredSerializer,
     UserSerializer,
     GroupSerializer,
     AgreementsSerializer,
@@ -182,6 +183,24 @@ class TransactionViewSet(viewsets.ModelViewSet):
         )
 
         serializer = TransationsAggregaredSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    def category(self, request):
+        filter_queryset = self.filter_queryset(self.get_queryset())
+        queryset = (
+            filter_queryset.values(
+                # "month",
+                # "year",
+                "type__type",
+            )
+            .annotate(
+                sum_amount=Sum("amount"),
+            )
+            .order_by("type__type")
+        )
+        print(queryset)
+        serializer = CategoryAggregaredSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
